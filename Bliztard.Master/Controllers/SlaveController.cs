@@ -13,10 +13,10 @@ public class SlaveController(IMachineService machineService, IHttpClientFactory 
     private readonly MachineInfo              m_MachineInfo    = machineInfo;
     
     /// <summary>
-    /// kad se slave spawnuje da kaze Bliztard.Master-u da je spreman da se koristi
+    /// When slave is spawned, to tell Master that it is ready to use
     /// </summary>
-    /// <param name="machineInfo"></param>
-    /// <returns></returns>
+    /// <param name="machineInfo">All info about that slave(id, isAlive, resources, ...)</param>
+    /// <returns>Http status code</returns>
     [HttpPost("slaves/register")]
     public IActionResult Register([FromBody] MachineInfo machineInfo)
     {
@@ -31,10 +31,10 @@ public class SlaveController(IMachineService machineService, IHttpClientFactory 
     }
     
     /// <summary>
-    /// heartbeat na 4 sekundi salje slave, a na 8 sekundi proverava master
+    /// Heartbeat from slave to say he is alive
     /// </summary>
-    /// <param name="slaveId"></param>
-    /// <returns></returns>
+    /// <param name="slaveId">Unique identifier of a slave that master is calling</param>
+    /// <returns>Http status code</returns>
     [HttpGet("slaves/heartbeat/{slaveId}")]
     public IActionResult Heartbeat([FromRoute] Guid slaveId)
     {
@@ -47,11 +47,15 @@ public class SlaveController(IMachineService machineService, IHttpClientFactory 
         m_Logger.LogDebug("Heartbeat accepted. Machine id: '{machineId}'.", slaveId);
         return Ok();
     }
-    
+
+    /// <summary>
+    /// Get all slaves of a master
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("slaves")]
     public IActionResult List()
     {
-        return Ok();
+        return Ok(m_MachineService.GetAll());
     }
 
 }

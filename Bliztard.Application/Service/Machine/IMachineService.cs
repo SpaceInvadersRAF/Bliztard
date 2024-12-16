@@ -15,4 +15,6 @@ public interface IMachineService
     public MachineInfo? Retrieve(Guid machineId);
 
     public bool Uroshbeat(Guid machineId);
+
+    public IEnumerable<MachineInfo> GetAll();
 }

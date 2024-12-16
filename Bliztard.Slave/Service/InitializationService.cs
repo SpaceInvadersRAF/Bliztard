@@ -6,8 +6,8 @@ namespace Bliztard.Slave.Service;
 
 public class InitializationService(MachineInfo machineInfo, IHttpClientFactory httpClientFactory, ILogger<InitializationService> logger)
 {
-    private readonly IHttpClientFactory             m_HttpClientFactory = httpClientFactory;
     private readonly MachineInfo                    m_MachineInfo       = machineInfo;
+    private readonly IHttpClientFactory             m_HttpClientFactory = httpClientFactory;
     private readonly ILogger<InitializationService> m_Logger            = logger;
 
     public async Task StartAsync()

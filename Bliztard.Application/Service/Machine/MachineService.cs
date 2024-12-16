@@ -28,6 +28,11 @@ public class MachineService(IMachineRepository repository, MachineInfo machineIn
         return SetAlive(machineId);
     }
 
+    public IEnumerable<MachineInfo> GetAll()
+    {
+        return Repository.GetAll();
+    }
+
     private bool SetAlive(Guid machineId, bool value = true)
     {
         var machineInfo = Repository.Get(machineId);
