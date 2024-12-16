@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bliztard.Master", "Bliztard.Master\Bliztard.Master.csproj", "{6324FBC6-5DA3-4141-846B-4D4FEA622567}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1F203984-205F-4097-A438-DED277EE61C3}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bliztard.Slave", "Bliztard.Slave\Bliztard.Slave.csproj", "{B6E56725-3E63-41D8-AADD-287AF08CB20C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bliztard.Application", "Bliztard.Application\Bliztard.Application.csproj", "{814AABF6-1D13-4F85-8304-E27286B4204F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bliztard.Contract", "Bliztard.Contract\Bliztard.Contract.csproj", "{FF68C2B6-615A-45E4-9CAF-BC83423A53F2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6324FBC6-5DA3-4141-846B-4D4FEA622567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6324FBC6-5DA3-4141-846B-4D4FEA622567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6324FBC6-5DA3-4141-846B-4D4FEA622567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6324FBC6-5DA3-4141-846B-4D4FEA622567}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6E56725-3E63-41D8-AADD-287AF08CB20C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6E56725-3E63-41D8-AADD-287AF08CB20C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6E56725-3E63-41D8-AADD-287AF08CB20C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6E56725-3E63-41D8-AADD-287AF08CB20C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{814AABF6-1D13-4F85-8304-E27286B4204F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{814AABF6-1D13-4F85-8304-E27286B4204F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{814AABF6-1D13-4F85-8304-E27286B4204F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{814AABF6-1D13-4F85-8304-E27286B4204F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF68C2B6-615A-45E4-9CAF-BC83423A53F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF68C2B6-615A-45E4-9CAF-BC83423A53F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF68C2B6-615A-45E4-9CAF-BC83423A53F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF68C2B6-615A-45E4-9CAF-BC83423A53F2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

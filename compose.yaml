@@ -1,0 +1,12 @@
+﻿services:
+  master:
+    image: master
+    build:
+      context: .
+      dockerfile: Master/Dockerfile
+
+  slave:
+    image: slave
+    build:
+      context: .
+      dockerfile: Slave/Dockerfile

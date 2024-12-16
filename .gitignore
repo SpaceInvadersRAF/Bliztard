@@ -1,0 +1,21 @@
+# IDE
+.vs/
+.idea/
+.vscode/
+
+# Compiled
+build/
+bin/
+obj/
+
+# Package manager
+nupkg/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Macshit
+.DS_Store
