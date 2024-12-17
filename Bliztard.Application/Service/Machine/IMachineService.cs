@@ -17,4 +17,6 @@ public interface IMachineService
     public bool Uroshbeat(Guid machineId);
 
     public IEnumerable<MachineInfo> GetAll();
+
+    public bool UploadFile(Stream openReadStream, string fileName, string extension);
 }

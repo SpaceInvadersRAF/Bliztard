@@ -1,4 +1,6 @@
-﻿namespace Bliztard.Application.Model;
+﻿using System.Collections.Concurrent;
+
+namespace Bliztard.Application.Model;
 
 public class MachineInfo
 {

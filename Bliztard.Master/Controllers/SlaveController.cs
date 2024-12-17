@@ -1,4 +1,5 @@
-﻿using Bliztard.Application.Model;
+﻿using System.Security.Cryptography;
+using Bliztard.Application.Model;
 using Bliztard.Application.Service.Machine;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,8 @@ public class SlaveController(IMachineService machineService, IHttpClientFactory 
     private readonly IHttpClientFactory       m_HttpClient     = httpClient;
     private readonly ILogger<SlaveController> m_Logger         = logger;
     private readonly MachineInfo              m_MachineInfo    = machineInfo;
+
+    private const int c_MaxFileSize = 1024 * 1024 * 1024;
     
     /// <summary>
     /// When slave is spawned, to tell Master that it is ready to use
@@ -56,6 +59,25 @@ public class SlaveController(IMachineService machineService, IHttpClientFactory 
     public IActionResult List()
     {
         return Ok(m_MachineService.GetAll());
+    }
+
+    [HttpPost("upload")]
+    public IActionResult Upload(IFormFile file)
+    {
+        List<string> validExtensions = new List<string> { ".jpg", ".png", ".gif", ".jpeg", ".docx", ".txt" };
+        string extension = Path.GetExtension(file.FileName);
+        if (!validExtensions.Contains(extension))
+            return BadRequest($"File extension '{extension}' is not supported.");
+
+        if (file.Length > c_MaxFileSize)
+            return BadRequest("File size is too big.");
+
+        using (var stream = file.OpenReadStream())
+        {
+            m_MachineService.UploadFile(stream, file.FileName, extension);
+        }
+
+        return Ok();
     }
 
 }
