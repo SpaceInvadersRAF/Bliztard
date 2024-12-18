@@ -1,5 +1,7 @@
 ﻿using Bliztard.Application.Model;
+using Bliztard.Application.Repository.File;
 using Bliztard.Application.Repository.Machine;
+using Bliztard.Application.Service.File;
 using Bliztard.Application.Service.Machine;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,7 +12,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBliztardApplication(this IServiceCollection services)
     {
         services.AddSingleton<IMachineRepository, MachineRepository>();
+        services.AddSingleton<IFileRepository, InMemoryFileRepository>();
         services.AddSingleton<IMachineService, MachineService>();
+        services.AddSingleton<IFileService, InMemoryFileService>();
 
         return services;
     }
