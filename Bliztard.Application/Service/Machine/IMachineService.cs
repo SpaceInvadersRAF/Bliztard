@@ -14,5 +14,7 @@ public interface IMachineService
 
     public MachineInfo? Retrieve(Guid machineId);
 
+    public IEnumerable<MachineInfo> AllSlavesWillingToAcceptFile();
+
     public bool Uroshbeat(Guid machineId);
 }

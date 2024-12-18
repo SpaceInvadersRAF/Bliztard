@@ -5,19 +5,26 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bliztard.Master.Controllers;
 
 [ApiController]
-public class SlaveController(IMachineService machineService, IHttpClientFactory httpClient, ILogger<SlaveController> logger, MachineInfo machineInfo) : ControllerBase
+public class MachineController(IMachineService machineService, IHttpClientFactory httpClient, ILogger<MachineController> logger, MachineInfo machineInfo) : ControllerBase
 {
-    private readonly IMachineService          m_MachineService = machineService;
-    private readonly IHttpClientFactory       m_HttpClient     = httpClient;
-    private readonly ILogger<SlaveController> m_Logger         = logger;
-    private readonly MachineInfo              m_MachineInfo    = machineInfo;
+    private readonly IMachineService            m_MachineService = machineService;
+    private readonly IHttpClientFactory         m_HttpClient     = httpClient;
+    private readonly ILogger<MachineController> m_Logger         = logger;
+    private readonly MachineInfo                m_MachineInfo    = machineInfo;
+    
+    [HttpPost("machines/upload")]
+    public IActionResult UploadLocations() // Round Robin Hood (ide maca oko tebe / vruci krompirici)
+    {
+        // vraca slejvove na koje ovaj moze da upload-uje fajl 
+        return Ok(m_MachineService.AllSlavesWillingToAcceptFile());
+    }
     
     /// <summary>
     /// kad se slave spawnuje da kaze Bliztard.Master-u da je spreman da se koristi
     /// </summary>
     /// <param name="machineInfo"></param>
     /// <returns></returns>
-    [HttpPost("slaves/register")]
+    [HttpPost("machines/register")]
     public IActionResult Register([FromBody] MachineInfo machineInfo)
     {
         if (!m_MachineService.Register(machineInfo))
@@ -35,8 +42,8 @@ public class SlaveController(IMachineService machineService, IHttpClientFactory 
     /// </summary>
     /// <param name="slaveId"></param>
     /// <returns></returns>
-    [HttpGet("slaves/heartbeat/{slaveId}")]
-    public IActionResult Heartbeat([FromRoute] Guid slaveId)
+    [HttpGet("machines/heartbeat/{slaveId}")]
+    public IActionResult AcceptHeartbeat([FromRoute] Guid slaveId)
     {
         if (!m_MachineService.Uroshbeat(slaveId))
         {
@@ -48,10 +55,9 @@ public class SlaveController(IMachineService machineService, IHttpClientFactory 
         return Ok();
     }
     
-    [HttpGet("slaves")]
+    [HttpGet("machines")]
     public IActionResult List()
     {
         return Ok();
     }
-
 }

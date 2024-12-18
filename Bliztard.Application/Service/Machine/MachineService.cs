@@ -3,10 +3,11 @@ using Bliztard.Application.Repository.Machine;
 
 namespace Bliztard.Application.Service.Machine;
 
-public class MachineService(IMachineRepository repository, MachineInfo machineInfo) : IMachineService
+public class MachineService(IMachineRepository repository, MachineInfo machineInfo) : IMachineService 
 {
-    public IMachineRepository Repository  { get; } = repository;
-    public MachineInfo        MachineInfo { get; } = machineInfo;
+    public  IMachineRepository Repository  { get; } = repository;
+    public  MachineInfo        MachineInfo { get; } = machineInfo;
+    private int                m_CurrentIndex       = 0;
 
     public bool Register(MachineInfo machineInfo) 
     {
@@ -22,8 +23,13 @@ public class MachineService(IMachineRepository repository, MachineInfo machineIn
     {
         return Repository.Get(machineId);
     }
+    
+    public IEnumerable<MachineInfo> AllSlavesWillingToAcceptFile()
+    {
+        return [Repository.Machines.Values.ToList()[m_CurrentIndex++ % Repository.Machines.Count]];
+    }
 
-    public bool Uroshbeat(Guid machineId) 
+    public bool Uroshbeat(Guid machineId)
     {
         return SetAlive(machineId);
     }
@@ -35,7 +41,7 @@ public class MachineService(IMachineRepository repository, MachineInfo machineIn
         if (machineInfo == null)
             return false;
 
-        machineInfo.Alive = true;
+        machineInfo.Alive = value;
 
         return true;
     }
