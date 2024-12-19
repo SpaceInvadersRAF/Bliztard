@@ -21,7 +21,7 @@ public class InitializationService(MachineInfo machineInfo, IHttpClientFactory h
         var httpClient = m_HttpClientFactory.CreateClient();
         var content    = new StringContent(JsonSerializer.Serialize(m_MachineInfo), Encoding.UTF8, "application/json");
         
-        var response = await httpClient.PostAsync("http://localhost:5259/slaves/register", content);
+        var response = await httpClient.PostAsync("http://localhost:5259/machines/register", content);
         
         response.EnsureSuccessStatusCode();
         
@@ -35,7 +35,7 @@ public class InitializationService(MachineInfo machineInfo, IHttpClientFactory h
             var httpClient = m_HttpClientFactory.CreateClient();
             httpClient.Timeout = TimeSpan.FromSeconds(4);
 
-            var task = httpClient.GetAsync($"http://localhost:5259/slaves/heartbeat/{m_MachineInfo.Id}", CancellationToken.None);
+            var task = httpClient.GetAsync($"http://localhost:5259/machines/heartbeat/{m_MachineInfo.Id}", CancellationToken.None);
 
             m_Logger.LogDebug("Machine with id '{machineId}' has sent a heartbeat.", m_MachineInfo.Id);
 

@@ -1,6 +1,7 @@
 using Bliztard.Application;
 using Bliztard.Application.Model;
 using Bliztard.Slave.Service;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Bliztard.Slave;
 
@@ -18,8 +19,20 @@ public static class Program
                                              options.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
                                          });
         
+        builder.WebHost.ConfigureKestrel((_, options) =>
+                                         {
+                                             options.Limits.MaxRequestBodySize   = 20_000_000_000;
+                                         });
+
+        builder.Services.Configure<FormOptions>(options =>
+                                                {
+                                                    options.MultipartBodyLengthLimit     = 20_000_000_000;
+                                                    options.MultipartBoundaryLengthLimit = 2_000_000_000; 
+                                                });
+        
         builder.Services.AddHttpClient();
         builder.Services.AddHttpContextAccessor();
+        builder.Services.AddBliztardApplication();
         builder.Services.AddMachine(MachineType.Slave);
 
         builder.Services.AddSingleton<InitializationService>();

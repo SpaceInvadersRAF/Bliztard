@@ -6,21 +6,28 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bliztard.Master.Controllers;
 
 [ApiController]
-public class SlaveController(IMachineService machineService, IHttpClientFactory httpClient, ILogger<SlaveController> logger, MachineInfo machineInfo) : ControllerBase
+public class MachineController(IMachineService machineService, IHttpClientFactory httpClient, ILogger<MachineController> logger, MachineInfo machineInfo) : ControllerBase
 {
-    private readonly IMachineService          m_MachineService = machineService;
-    private readonly IHttpClientFactory       m_HttpClient     = httpClient;
-    private readonly ILogger<SlaveController> m_Logger         = logger;
-    private readonly MachineInfo              m_MachineInfo    = machineInfo;
+    private readonly IMachineService            m_MachineService = machineService;
+    private readonly IHttpClientFactory         m_HttpClient     = httpClient;
+    private readonly ILogger<MachineController> m_Logger         = logger;
+    private readonly MachineInfo                m_MachineInfo    = machineInfo;
 
     private const int c_MaxFileSize = 1024 * 1024 * 1024;
-    
+
+    [HttpPost("machines/upload")]
+    public IActionResult UploadLocations() // Round Robin Hood (ide maca oko tebe / vruci krompirici)
+    {
+        // vraca slejvove na koje ovaj moze da upload-uje fajl
+        return Ok(m_MachineService.AllSlavesWillingToAcceptFile());
+    }
+
     /// <summary>
     /// When slave is spawned, to tell Master that it is ready to use
     /// </summary>
     /// <param name="machineInfo">All info about that slave(id, isAlive, resources, ...)</param>
     /// <returns>Http status code</returns>
-    [HttpPost("slaves/register")]
+    [HttpPost("machines/register")]
     public IActionResult Register([FromBody] MachineInfo machineInfo)
     {
         if (!m_MachineService.Register(machineInfo))
@@ -38,8 +45,8 @@ public class SlaveController(IMachineService machineService, IHttpClientFactory 
     /// </summary>
     /// <param name="slaveId">Unique identifier of a slave that master is calling</param>
     /// <returns>Http status code</returns>
-    [HttpGet("slaves/heartbeat/{slaveId}")]
-    public IActionResult Heartbeat([FromRoute] Guid slaveId)
+    [HttpGet("machines/heartbeat/{slaveId}")]
+    public IActionResult AcceptHeartbeat([FromRoute] Guid slaveId)
     {
         if (!m_MachineService.Uroshbeat(slaveId))
         {
@@ -55,7 +62,7 @@ public class SlaveController(IMachineService machineService, IHttpClientFactory 
     /// Get all slaves of a master
     /// </summary>
     /// <returns></returns>
-    [HttpGet("slaves")]
+    [HttpGet("machines")]
     public IActionResult List()
     {
         return Ok(m_MachineService.GetAll());
@@ -77,7 +84,6 @@ public class SlaveController(IMachineService machineService, IHttpClientFactory 
             m_MachineService.UploadFile(stream, file.FileName, extension);
         }
 
-        return Ok();
+        return Ok(m_MachineService.GetAll());
     }
-
 }
