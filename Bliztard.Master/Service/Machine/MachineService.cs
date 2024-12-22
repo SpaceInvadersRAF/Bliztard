@@ -1,7 +1,9 @@
-﻿using Bliztard.Application.Model;
-using Bliztard.Application.Repository.Machine;
+﻿using Bliztard.Application.Mapper;
+using Bliztard.Application.Model;
+using Bliztard.Contract.Request;
+using Bliztard.Master.Repository.Machine;
 
-namespace Bliztard.Application.Service.Machine;
+namespace Bliztard.Master.Service.Machine;
 
 public class MachineService(IMachineRepository repository, MachineInfo machineInfo) : IMachineService 
 {
@@ -9,9 +11,9 @@ public class MachineService(IMachineRepository repository, MachineInfo machineIn
     public  MachineInfo        MachineInfo { get; } = machineInfo;
     private int                m_CurrentIndex       = 0;
 
-    public bool Register(MachineInfo machineInfo) 
+    public bool Register(MachineInfoRequest machineInfo) 
     {
-        return Repository.Add(machineInfo);
+        return Repository.Add(machineInfo.ToModel());
     }
 
     public bool Unregister(Guid machineId) 

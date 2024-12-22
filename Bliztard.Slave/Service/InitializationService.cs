@@ -1,5 +1,4 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
 
 namespace Bliztard.Slave.Service;
@@ -19,9 +18,8 @@ public class InitializationService(MachineInfo machineInfo, IHttpClientFactory h
     public async Task NotifyMaster()
     {
         var httpClient = m_HttpClientFactory.CreateClient();
-        var content    = new StringContent(JsonSerializer.Serialize(m_MachineInfo), Encoding.UTF8, "application/json");
         
-        var response = await httpClient.PostAsync("http://localhost:5259/machines/register", content);
+        var response = await httpClient.PostAsJsonAsync("http://localhost:5259/machines/register", m_MachineInfo.ToRequest(), CancellationToken.None);
         
         response.EnsureSuccessStatusCode();
         
@@ -43,5 +41,30 @@ public class InitializationService(MachineInfo machineInfo, IHttpClientFactory h
         }
 
         return Task.CompletedTask;
+    }
+    
+    // public async Task NotifyMasterAboutFileUpload(string filePath, string username)
+    // {
+    //     var httpClient = m_HttpClientFactory.CreateClient();
+    //     
+    //     var content    = new StringContent(JsonSerializer.Serialize(m_MachineInfo), Encoding.UTF8, "application/json");
+    //     
+    //     var response = await httpClient.PostAsync("http://localhost:5259/files/notify-upload", content);
+    //     
+    //     response.EnsureSuccessStatusCode();
+    //     
+    //     m_Logger.LogDebug("Machine with id '{machineId}' has notified the master about file upload. File path: {filePath}", m_MachineInfo.Id, filePath);
+    // }
+
+    public async Task<HttpContent> AskMasterForNextSlave()
+    {
+        var httpClient = m_HttpClientFactory.CreateClient();
+
+        var response = await httpClient.PostAsync("http://localhost:5259/machines/upload", null);
+
+        response.EnsureSuccessStatusCode();
+        m_Logger.LogDebug("Slave with {slaveId} is asking master for next slave", m_MachineInfo.Id);
+
+        return response.Content;
     }
 }

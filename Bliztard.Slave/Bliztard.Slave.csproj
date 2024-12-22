@@ -22,4 +22,8 @@
       <ProjectReference Include="..\Bliztard.Contract\Bliztard.Contract.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Repository\" />
+    </ItemGroup>
+
 </Project>

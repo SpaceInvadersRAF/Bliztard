@@ -1,4 +1,4 @@
-﻿using Bliztard.Application.Service.Machine;
+﻿using Bliztard.Master.Service.Machine;
 
 namespace Bliztard.Master.Service;
 

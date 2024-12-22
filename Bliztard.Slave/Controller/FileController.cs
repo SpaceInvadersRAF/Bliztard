@@ -1,5 +1,7 @@
-﻿using Bliztard.Application.Model;
-using Bliztard.Application.Service.File;
+﻿using Bliztard.Application.Mapper;
+using Bliztard.Application.Model;
+using Bliztard.Contract.Request;
+using Bliztard.Slave.Service.File;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
@@ -7,9 +9,12 @@ using Microsoft.Net.Http.Headers;
 namespace Bliztard.Slave.Controller;
 
 [ApiController]
-public class FileController(IHttpClientFactory httpClientFactory, MachineInfo machineInfo, IFileService fileService) : ControllerBase
+public class FileController(IHttpClientFactory httpClientFactory, MachineInfo machineInfo, IFileService fileService, ILogger<MachineController> logger) : ControllerBase
 {
-    private readonly IFileService m_FileService = fileService;
+    private readonly IHttpClientFactory         m_HttpClientFactory = httpClientFactory;
+    private readonly IFileService               m_FileService       = fileService;
+    private readonly ILogger<MachineController> m_Logger            = logger;
+    private readonly MachineInfo                m_MachineInfo       = machineInfo;
     
     [HttpPost("files/upload")]
     public async Task<IActionResult> Upload()
@@ -37,13 +42,17 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
             else if (!string.IsNullOrEmpty(contentDisposition.Name.Value))
             {
                 using var dataStream = new StreamReader(section.Body);
-                
+
                 formData[contentDisposition.Name.Value] = await dataStream.ReadToEndAsync();
             }
         }
-
+        
         if (!m_FileService.Save(formData, pathId))
             return BadRequest();
+        
+        var httpClient = m_HttpClientFactory.CreateClient();
+
+        httpClient.PostAsJsonAsync("http://localhost:5259/files/notify-upload", new NotifyUploadRequest { MachineInfo = m_MachineInfo.ToRequest() });
 
         return Created($"{formData["username"]} {formData["path"]}", null);
     }

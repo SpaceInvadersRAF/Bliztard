@@ -1,4 +1,4 @@
-﻿namespace Bliztard.Application.Repository.File;
+﻿namespace Bliztard.Slave.Repository.File;
 
 public interface IFileRepository
 {

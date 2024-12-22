@@ -1,6 +1,9 @@
 using Bliztard.Application;
+using Bliztard.Application.Extension;
 using Bliztard.Application.Model;
+using Bliztard.Master.Repository.Machine;
 using Bliztard.Master.Service;
+using Bliztard.Master.Service.Machine;
 
 namespace Bliztard.Master;
 
@@ -39,5 +42,13 @@ public static class Program
         app.Services.GetRequiredService<InitializationService>().StartAsync();
 
         app.WaitForShutdown();
+    }
+
+    public static IServiceCollection AddBliztardApplication(this IServiceCollection services)
+    {
+        services.AddSingleton<IMachineRepository, MachineRepository>();
+        services.AddSingleton<IMachineService, MachineService>();
+
+        return services;
     }
 }

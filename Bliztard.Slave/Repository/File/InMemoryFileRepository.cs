@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Bliztard.Application.Repository.File;
+namespace Bliztard.Slave.Repository.File;
 
 public class InMemoryFileRepository : IFileRepository
 {

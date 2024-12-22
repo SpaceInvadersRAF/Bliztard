@@ -1,6 +1,6 @@
-﻿using Bliztard.Application.Repository.File;
+﻿using Bliztard.Slave.Repository.File;
 
-namespace Bliztard.Application.Service.File;
+namespace Bliztard.Slave.Service.File;
 
 public interface IFileService
 {

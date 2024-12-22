@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Bliztard.Application.Model;
 
-namespace Bliztard.Application.Repository.Machine;
+namespace Bliztard.Master.Repository.Machine;
 
 public class MachineRepository : IMachineRepository
 {

@@ -1,5 +1,6 @@
 ﻿using Bliztard.Application.Model;
-using Bliztard.Application.Service.Machine;
+using Bliztard.Contract.Request;
+using Bliztard.Master.Service.Machine;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bliztard.Master.Controllers;
@@ -25,7 +26,7 @@ public class MachineController(IMachineService machineService, IHttpClientFactor
     /// <param name="machineInfo"></param>
     /// <returns></returns>
     [HttpPost("machines/register")]
-    public IActionResult Register([FromBody] MachineInfo machineInfo)
+    public IActionResult Register([FromBody] MachineInfoRequest machineInfo)
     {
         if (!m_MachineService.Register(machineInfo))
         {
