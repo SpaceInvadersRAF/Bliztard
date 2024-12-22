@@ -1,6 +1,6 @@
 ﻿namespace Bliztard.Contract.Request;
 
-public struct MachineInfoRequest
+public readonly struct MachineInfoRequest
 {
     public Guid   Id      { init; get; } 
     public int    Type    { init; get; }

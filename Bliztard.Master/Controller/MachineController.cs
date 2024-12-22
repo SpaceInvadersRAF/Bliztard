@@ -3,7 +3,7 @@ using Bliztard.Contract.Request;
 using Bliztard.Master.Service.Machine;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Bliztard.Master.Controllers;
+namespace Bliztard.Master.Controller;
 
 [ApiController]
 public class MachineController(IMachineService machineService, IHttpClientFactory httpClient, ILogger<MachineController> logger, MachineInfo machineInfo) : ControllerBase
