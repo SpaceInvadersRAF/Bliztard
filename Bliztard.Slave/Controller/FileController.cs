@@ -1,6 +1,5 @@
 ﻿using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
-using Bliztard.Contract.Request;
 using Bliztard.Slave.Service.File;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -47,25 +46,27 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
             }
         }
         
-        if (!m_FileService.Save(formData, pathId))
+        var saveUploadInfo = new SaveFileInfo(m_MachineInfo, pathId, formData);
+        
+        if (!m_FileService.Save(saveUploadInfo)) 
             return BadRequest();
         
         var httpClient = m_HttpClientFactory.CreateClient();
 
-        httpClient.PostAsJsonAsync("http://localhost:5259/files/notify-upload", new NotifyUploadRequest { MachineInfo = m_MachineInfo.ToRequest() });
+        await httpClient.PostAsJsonAsync("http://localhost:5259/files/notify-upload", saveUploadInfo.ToRequest());
 
-        return Created($"{formData["username"]} {formData["path"]}", null);
+        return Created(saveUploadInfo.Location, null); 
     }
     
     [HttpGet("files/download")]
     public async Task<IActionResult> Download([FromForm(Name = "username")] string username, [FromForm(Name = "path")] string path)
     {
-        await using var stream = m_FileService.Read($"{username}/{path}");
+        var stream = m_FileService.Read($"{username}/{path}");
         
         if (stream == null)
             return NotFound();
         
-        using var reader = new StreamReader(stream);
+        var reader = new StreamReader(stream);
         
         return Ok(await reader.ReadToEndAsync());
     }

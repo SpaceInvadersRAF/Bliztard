@@ -1,4 +1,5 @@
-﻿using Bliztard.Slave.Repository.File;
+﻿using Bliztard.Application.Model;
+using Bliztard.Slave.Repository.File;
 
 namespace Bliztard.Slave.Service.File;
 
@@ -13,9 +14,9 @@ public class InMemoryFileService(IFileRepository repository) : IFileService
         return Repository.CreateStream(pathId.ToString());
     }
 
-    public bool Save(IDictionary<string, string> data, Guid pathId)
+    public bool Save(SaveFileInfo saveFileInfo)
     {
-        return Repository.Save($"{data["username"]}/{data["path"]}", pathId);
+        return Repository.Save(saveFileInfo.Resource, saveFileInfo.PathId);
     }
 
     public Stream? Read(string resource)
