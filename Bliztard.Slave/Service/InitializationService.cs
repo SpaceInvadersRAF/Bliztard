@@ -42,29 +42,4 @@ public class InitializationService(MachineInfo machineInfo, IHttpClientFactory h
 
         return Task.CompletedTask;
     }
-    
-    // public async Task NotifyMasterAboutFileUpload(string filePath, string username)
-    // {
-    //     var httpClient = m_HttpClientFactory.CreateClient();
-    //     
-    //     var content    = new StringContent(JsonSerializer.Serialize(m_MachineInfo), Encoding.UTF8, "application/json");
-    //     
-    //     var response = await httpClient.PostAsync("http://localhost:5259/files/notify-upload", content);
-    //     
-    //     response.EnsureSuccessStatusCode();
-    //     
-    //     m_Logger.LogDebug("Machine with id '{machineId}' has notified the master about file upload. File path: {filePath}", m_MachineInfo.Id, filePath);
-    // }
-
-    public async Task<HttpContent> AskMasterForNextSlave()
-    {
-        var httpClient = m_HttpClientFactory.CreateClient();
-
-        var response = await httpClient.PostAsync("http://localhost:5259/machines/upload", null);
-
-        response.EnsureSuccessStatusCode();
-        m_Logger.LogDebug("Slave with {slaveId} is asking master for next slave", m_MachineInfo.Id);
-
-        return response.Content;
-    }
 }
