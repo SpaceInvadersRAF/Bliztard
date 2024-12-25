@@ -8,10 +8,11 @@ namespace Bliztard.Master.Service.Machine;
 
 public class MachineService(IMachineRepository repository, MachineInfo machineInfo, IFileRepository fileRepository) : IMachineService 
 {
-    public  IMachineRepository Repository     { get; } = repository;
-    public  IFileRepository    FileRepository { get; } = fileRepository;
-    public  MachineInfo        MachineInfo    { get; } = machineInfo; 
-    private int                m_CurrentIndex          = 0; 
+    public           IMachineRepository Repository     { get; } = repository;
+    public           IFileRepository    FileRepository { get; } = fileRepository;
+    public           MachineInfo        MachineInfo    { get; } = machineInfo; 
+    private          int                m_CurrentIndex          = 0;
+    private readonly object             m_Lock                  = new();
     
     public bool Register(MachineInfoRequest machineInfo) 
     {
@@ -30,8 +31,12 @@ public class MachineService(IMachineRepository repository, MachineInfo machineIn
     
     public IEnumerable<MachineInfo> AllSlavesWillingToAcceptFile(UploadLocationsRequest request)
     {
-        var  machines   = Repository.Machines.Values.ToList();
-        int  startIndex = Interlocked.Increment(ref m_CurrentIndex) % machines.Count;
+        var machines   = Repository.Machines.Values.ToList();
+        int startIndex;
+
+        lock (m_Lock)
+            startIndex = m_CurrentIndex = (m_CurrentIndex + 1) % machines.Count;
+        
         bool firstRound = true;
         
         for (int currentIndex = startIndex; firstRound || currentIndex < startIndex; ++currentIndex)
