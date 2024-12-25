@@ -16,4 +16,15 @@ public static class SaveFileInfoMapper
                    Replication = saveFileInfo.Replication
                };
     }
+
+    public static UploadLocationsRequest ToUploadLocationsRequest(this SaveFileInfo saveFileInfo)
+    {
+        return new UploadLocationsRequest
+               {
+                   MachineInfo = saveFileInfo.MachineInfo.ToRequest(),
+                   FilePath    = saveFileInfo.FilePath,
+                   Username    = saveFileInfo.Username,
+                   Length      = saveFileInfo.Length,
+               };
+    }
 }

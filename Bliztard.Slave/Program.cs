@@ -17,7 +17,7 @@ public static class Program
         builder.Logging.ClearProviders();
         builder.Logging.AddSimpleConsole(options =>
                                          {
-                                             options.IncludeScopes   = true;
+                                             options.IncludeScopes   = false;
                                              options.SingleLine      = true;
                                              options.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
                                          });
