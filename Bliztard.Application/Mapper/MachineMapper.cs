@@ -1,5 +1,6 @@
 ﻿using Bliztard.Application.Model;
 using Bliztard.Contract.Request;
+using Bliztard.Contract.Response;
 
 namespace Bliztard.Application.Mapper;
 
@@ -8,6 +9,17 @@ public static class MachineInfoMapper
     public static MachineInfoRequest ToRequest(this MachineInfo machineInfo)
     {
         return new MachineInfoRequest
+               {
+                   Id      = machineInfo.Id,
+                   Type    = machineInfo.Type,
+                   BaseUrl = machineInfo.Resource.BaseUrl,
+                   Alive   = machineInfo.Alive
+               };
+    }
+    
+    public static MachineInfoResponse ToResponse(this MachineInfo machineInfo)
+    {
+        return new MachineInfoResponse
                {
                    Id      = machineInfo.Id,
                    Type    = machineInfo.Type,
@@ -25,8 +37,16 @@ public static class MachineInfoRequestMapper
                {
                    Id       = machineInfoRequest.Id,
                    Type     = machineInfoRequest.Type,
-                   Resource = new MachineResource { BaseUrl = machineInfoRequest.BaseUrl },
+                   Resource = { BaseUrl = machineInfoRequest.BaseUrl },
                    Alive    = machineInfoRequest.Alive
                };
+    }
+}
+
+public static class EnumerableMapper
+{
+    public static IEnumerable<MachineInfoResponse> ToResponse(this IEnumerable<MachineInfo> enumerable)
+    {
+        return enumerable.Select(machineInfo => machineInfo.ToResponse());
     }
 }

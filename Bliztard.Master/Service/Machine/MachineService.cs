@@ -1,16 +1,18 @@
 ﻿using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
 using Bliztard.Contract.Request;
+using Bliztard.Master.Repository.File;
 using Bliztard.Master.Repository.Machine;
 
 namespace Bliztard.Master.Service.Machine;
 
-public class MachineService(IMachineRepository repository, MachineInfo machineInfo) : IMachineService 
+public class MachineService(IMachineRepository repository, MachineInfo machineInfo, IFileRepository fileRepository) : IMachineService 
 {
-    public  IMachineRepository Repository  { get; } = repository;
-    public  MachineInfo        MachineInfo { get; } = machineInfo;
-    private int                m_CurrentIndex       = 0;
-
+    public  IMachineRepository Repository     { get; } = repository;
+    public  IFileRepository    FileRepository { get; } = fileRepository;
+    public  MachineInfo        MachineInfo    { get; } = machineInfo; 
+    private int                m_CurrentIndex          = 0; 
+    
     public bool Register(MachineInfoRequest machineInfo) 
     {
         return Repository.Add(machineInfo.ToModel());
@@ -26,9 +28,22 @@ public class MachineService(IMachineRepository repository, MachineInfo machineIn
         return Repository.Get(machineId);
     }
     
-    public IEnumerable<MachineInfo> AllSlavesWillingToAcceptFile()
+    public IEnumerable<MachineInfo> AllSlavesWillingToAcceptFile(UploadLocationsRequest request)
     {
-        return [Repository.Machines.Values.ToList()[m_CurrentIndex++ % Repository.Machines.Count]];
+        var  machines   = Repository.Machines.Values.ToList();
+        int  startIndex = Interlocked.Increment(ref m_CurrentIndex) % machines.Count;
+        bool firstRound = true;
+        
+        for (int currentIndex = startIndex; firstRound || currentIndex < startIndex; ++currentIndex)
+        {
+            if (!FileRepository.IsResourceOnMachine(machines[currentIndex].Id, request.Resource))
+                return [machines[currentIndex]];
+            
+            if (currentIndex == machines.Count - 1 && !(firstRound = false))
+                currentIndex = -1;
+        }
+
+        return [];
     }
 
     public bool Uroshbeat(Guid machineId)

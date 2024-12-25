@@ -1,5 +1,8 @@
-﻿using Bliztard.Application.Model;
+﻿using Bliztard.Application.Extension;
+using Bliztard.Application.Mapper;
+using Bliztard.Application.Model;
 using Bliztard.Contract.Request;
+using Bliztard.Contract.Response;
 using Bliztard.Master.Service.Machine;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +17,13 @@ public class MachineController(IMachineService machineService, IHttpClientFactor
     private readonly MachineInfo                m_MachineInfo    = machineInfo;
     
     [HttpPost("machines/upload")]
-    public IActionResult UploadLocations() // Round Robin Hood (ide maca oko tebe / vruci krompirici)
+    public IActionResult UploadLocations([FromBody] UploadLocationsRequest request)
     {
-        // vraca slejvove na koje ovaj moze da upload-uje fajl 
-        return Ok(m_MachineService.AllSlavesWillingToAcceptFile());
+        var machineInfos = m_MachineService.AllSlavesWillingToAcceptFile(request).ToList();
+        
+        m_Logger.LogDebug("Upload locations for resource '{resource}' are {machineIds}", request.Resource, string.Join(", ", machineInfos.Select(machineInfo => machineInfo.Id)));
+        
+        return Ok(new UploadLocationsResponse() { MachineInfos = machineInfos.ToResponse() });
     }
     
     /// <summary>
