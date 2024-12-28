@@ -1,4 +1,5 @@
-﻿using Bliztard.Application.Extension;
+﻿using Bliztard.Application.Configuration;
+using Bliztard.Application.Extension;
 using Bliztard.Application.Model;
 using Bliztard.Slave.Repository.File;
 using Bliztard.Slave.Service;
@@ -64,6 +65,27 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<ApplicationServiceLifecycle>();
 
+        services.AddHttpClient(Configurations.HttpClient.FileNotifyUpload,
+                               client =>
+                               {
+                                   client.BaseAddress = new Uri(Configurations.Core.MasterBaseUrl);
+                               });
+        services.AddHttpClient(Configurations.HttpClient.FileTwincateData,
+                               client =>
+                               {
+                                   client.BaseAddress = new Uri(Configurations.Core.MasterBaseUrl);
+                               });
+        services.AddHttpClient(Configurations.HttpClient.MachineNotifyMaster,
+                               client =>
+                               {
+                                   client.BaseAddress = new Uri(Configurations.Core.MasterBaseUrl);
+                               });
+        services.AddHttpClient(Configurations.HttpClient.MachineSendUroshbeat,
+                               client =>
+                               {
+                                   client.BaseAddress = new Uri(Configurations.Core.MasterBaseUrl);
+                               });
+        
         return services;
     }
 }

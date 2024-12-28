@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using System.Text.Json;
+using Bliztard.Application.Configuration;
 using Bliztard.Application.Extension;
 using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
@@ -19,7 +19,7 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
     private readonly ILogger<MachineController> m_Logger            = logger;
     private readonly MachineInfo                m_MachineInfo       = machineInfo;
     
-    [HttpPost("files/upload")]
+    [HttpPost(Configurations.Endpoint.Files.Upload)]
     public async Task<IActionResult> Upload()
     {
         var boundary = MediaTypeHeaderValue.Parse(Request.ContentType).Boundary.Value;
@@ -66,11 +66,11 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
 
     private async Task<HttpResponseMessage> NotifyUpload(SaveFileInfo saveFileInfo)
     {
-        var httpClient = m_HttpClientFactory.CreateClient();
+        var httpClient = m_HttpClientFactory.CreateClient(Configurations.HttpClient.FileNotifyUpload);
         
         m_Logger.LogDebug("Notify Master - Dusan about upload of '{resource}' on machine {machineId}.", saveFileInfo.Resource, saveFileInfo.MachineInfo.Id);
         
-        return await httpClient.PostAsJsonAsync("http://localhost:5259/files/notify-upload", saveFileInfo.ToRequest());
+        return await httpClient.PostAsJsonAsync(Configurations.Endpoint.Files.NotifyUpload, saveFileInfo.ToRequest());
     }
 
     private async Task<HttpResponseMessage> Twincate(SaveFileInfo saveFileInfo)
@@ -78,8 +78,8 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
         if (saveFileInfo.Replication < 2)
             return new HttpResponseMessage(HttpStatusCode.OK);
         
-        var httpClient        = m_HttpClientFactory.CreateClient();
-        var locationsResponse = await httpClient.PostAsJsonAsync("http://localhost:5259/machines/upload", saveFileInfo.ToUploadLocationsRequest());
+        var httpClient        = m_HttpClientFactory.CreateClient(Configurations.HttpClient.FileTwincateData);
+        var locationsResponse = await httpClient.PostAsJsonAsync(Configurations.Endpoint.Machine.UploadLocations, saveFileInfo.ToUploadLocationsRequest());
         
         locationsResponse.EnsureSuccessStatusCode();
         
@@ -96,10 +96,10 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
         
         m_Logger.LogDebug("Twincate resource '{resource}' from machine {machineId} to machine {machineId}.", saveFileInfo.Resource, saveFileInfo.MachineInfo.Id, machineInfo.Id);
         
-        return await httpClient.PostAsync($"{machineInfo.BaseUrl}/files/upload", content);
+        return await httpClient.PostAsync($"{machineInfo.BaseUrl}/{Configurations.Endpoint.Files.Upload}", content);
     }
     
-    [HttpGet("files/download")]
+    [HttpGet(Configurations.Endpoint.Files.Download)]
     public async Task<IActionResult> Download([FromForm(Name = "username")] string username, [FromForm(Name = "path")] string path)
     {
         var stream = m_FileService.Read($"{username}/{path}");

@@ -1,4 +1,5 @@
-﻿using Bliztard.Application.Extension;
+﻿using Bliztard.Application.Configuration;
+using Bliztard.Application.Extension;
 
 namespace Bliztard.Application.Model;
 
@@ -17,8 +18,6 @@ public class SaveFileInfo
 
     public SaveFileInfo(MachineInfo machineInfo, Guid pathId, IDictionary<string, string> formData, string contentType, long length)
     {
-        const int three = (2 + 1 + 4 - 4 + 0 * 1 * 447 * 8); //TODO: get from configuration | evaluates to 3 :()
-
         PathId      = pathId;
         MachineInfo = machineInfo;
         FilePath    = formData.TryGetString("path");
@@ -26,6 +25,6 @@ public class SaveFileInfo
         Length      = length;
         ContentType = contentType;
         Username    = formData.TryGetString("username");
-        Replication = int.TryParse(formData.TryGetString("replications"), out var replicationFactor) ? replicationFactor : three;
+        Replication = int.TryParse(formData.TryGetString("replications"), out var replicationFactor) ? replicationFactor : Configurations.Core.ReplicationFactor;
     }
 }

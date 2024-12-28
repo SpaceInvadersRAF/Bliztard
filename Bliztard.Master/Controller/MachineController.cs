@@ -1,4 +1,4 @@
-﻿using Bliztard.Application.Extension;
+﻿using Bliztard.Application.Configuration;
 using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
 using Bliztard.Contract.Request;
@@ -16,7 +16,7 @@ public class MachineController(IMachineService machineService, IHttpClientFactor
     private readonly ILogger<MachineController> m_Logger         = logger;
     private readonly MachineInfo                m_MachineInfo    = machineInfo;
     
-    [HttpPost("machines/upload")]
+    [HttpPost(Configurations.Endpoint.Machine.UploadLocations)]
     public IActionResult UploadLocations([FromBody] UploadLocationsRequest request)
     {
         var machineInfos = m_MachineService.AllSlavesWillingToAcceptFile(request).ToList();
@@ -31,7 +31,7 @@ public class MachineController(IMachineService machineService, IHttpClientFactor
     /// </summary>
     /// <param name="machineInfo"></param>
     /// <returns></returns>
-    [HttpPost("machines/register")]
+    [HttpPost(Configurations.Endpoint.Machine.Register)]
     public IActionResult Register([FromBody] MachineInfoRequest machineInfo)
     {
         if (!m_MachineService.Register(machineInfo))
@@ -47,18 +47,18 @@ public class MachineController(IMachineService machineService, IHttpClientFactor
     /// <summary>
     /// heartbeat na 4 sekundi salje slave, a na 8 sekundi proverava master
     /// </summary>
-    /// <param name="slaveId"></param>
+    /// <param name="machineId"></param>
     /// <returns></returns>
-    [HttpGet("machines/heartbeat/{slaveId}")]
-    public IActionResult AcceptHeartbeat([FromRoute] Guid slaveId)
+    [HttpGet(Configurations.Endpoint.Machine.AcceptHeartbeat)]   
+    public IActionResult AcceptHeartbeat([FromRoute] Guid machineId)
     {
-        if (!m_MachineService.Uroshbeat(slaveId))
+        if (!m_MachineService.Uroshbeat(machineId))
         {
-            m_Logger.LogDebug("Cannot process heartbeat. Machine with id: '{machineId}' is not registered.", slaveId);
+            m_Logger.LogDebug("Cannot process heartbeat. Machine with id: '{machineId}' is not registered.", machineId);
             return BadRequest();
         }
         
-        m_Logger.LogDebug("Heartbeat accepted. Machine id: '{machineId}'.", slaveId);
+        m_Logger.LogDebug("Heartbeat accepted. Machine id: '{machineId}'.", machineId);
         return Ok();
     }
     

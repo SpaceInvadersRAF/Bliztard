@@ -1,4 +1,5 @@
-﻿using Bliztard.Application.Mapper;
+﻿using Bliztard.Application.Configuration;
+using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
 
 namespace Bliztard.Slave.Service.Machine;
@@ -11,8 +12,6 @@ public class MachineService(MachineInfo machineInfo, ILogger<MachineService> log
     private readonly CancellationTokenSource m_CancellationToken = new();
     private          Timer?                  m_HeartbeatTimer;
     
-    private HttpClient m_HttpClient(string name = "") => m_HttpClientFactory.CreateClient(name);
-
     public void OnStart()
     {
         m_Logger.LogDebug("Start {service} service.", nameof(MachineService));
@@ -34,11 +33,13 @@ public class MachineService(MachineInfo machineInfo, ILogger<MachineService> log
     {
         m_Logger.LogDebug("Machine with id '{machineId}' has notified the master.", m_MachineInfo.Id);
 
-        var response = await m_HttpClient().PostAsJsonAsync("http://localhost:5259/machines/register", m_MachineInfo.ToRequest(), m_CancellationToken.Token);
+        var httpClient = m_HttpClientFactory.CreateClient(Configurations.HttpClient.MachineNotifyMaster);
+        
+        var response = await httpClient.PostAsJsonAsync(Configurations.Endpoint.Machine.Register, m_MachineInfo.ToRequest(), m_CancellationToken.Token);
         
         response.EnsureSuccessStatusCode();
 
-        m_HeartbeatTimer = new Timer((_ => Task.Run(MetroOnTheHeartBeatAsync)), this, TimeSpan.Zero, TimeSpan.FromSeconds(4));
+        m_HeartbeatTimer = new Timer((_ => Task.Run(MetroOnTheHeartBeatAsync)), this, TimeSpan.Zero, Configurations.Interval.UroshbeatDelay);
         
         return response;
     }
@@ -46,8 +47,10 @@ public class MachineService(MachineInfo machineInfo, ILogger<MachineService> log
     private async Task<HttpResponseMessage> MetroOnTheHeartBeatAsync()
     {
         m_Logger.LogDebug("Machine with id '{machineId}' has sent a heartbeat.", m_MachineInfo.Id);
+
+        var httpClient = m_HttpClientFactory.CreateClient(Configurations.HttpClient.MachineSendUroshbeat);
         
-        var response = await m_HttpClient().GetAsync($"http://localhost:5259/machines/heartbeat/{m_MachineInfo.Id}", m_CancellationToken.Token);
+        var response = await httpClient.GetAsync(Configurations.Endpoint.Machine.AcceptHeartbeat.Replace("{{machineId}}", m_MachineInfo.Id.ToString()), m_CancellationToken.Token);
         
         response.EnsureSuccessStatusCode();
         
