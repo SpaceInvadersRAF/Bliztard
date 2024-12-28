@@ -66,13 +66,4 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
-    public static IServiceCollection AddSingletonWithLifecycle<TService, TImplementation>(this IServiceCollection services) where TService : class, ILifecycle 
-                                                                                                                            where TImplementation : class, TService
-    {
-        services.AddSingleton<TService, TImplementation>();
-        services.AddSingleton<ILifecycle>(provider => provider.GetRequiredService<TService>());
-        
-        return services;
-    }
 }

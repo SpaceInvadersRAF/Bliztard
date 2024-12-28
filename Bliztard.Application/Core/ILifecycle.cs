@@ -1,4 +1,4 @@
-﻿namespace Bliztard.Slave.Application;
+﻿namespace Bliztard.Application.Core;
 
 public interface ILifecycle
 {

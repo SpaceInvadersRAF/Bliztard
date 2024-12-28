@@ -1,4 +1,5 @@
-﻿using Bliztard.Application.Model;
+﻿using Bliztard.Application.Core;
+using Bliztard.Application.Model;
 using Bliztard.Slave.Application;
 
 namespace Bliztard.Slave.Service.File;
