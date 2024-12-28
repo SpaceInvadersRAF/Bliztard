@@ -6,15 +6,15 @@ namespace Bliztard.Master.Service.File;
 
 public class InMemoryFileService(IFileRepository repository) : IFileService
 {
-    public IFileRepository Repository { get; } = repository;
+    private readonly IFileRepository m_Repository = repository;
 
     public bool RegisterFile(NotifySaveRequest notifySave)
     {
-        return Repository.SaveUpload(notifySave.MachineInfo.Id, notifySave.Resource);
+        return m_Repository.SaveUpload(notifySave.MachineInfo.Id, notifySave.Resource);
     }
 
     public MachineInfo? LocateFile(string resource)
     {
-        return Repository.RetrieveMachine(resource);
+        return m_Repository.RetrieveMachine(resource);
     }
 }

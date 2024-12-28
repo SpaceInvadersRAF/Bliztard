@@ -1,13 +1,11 @@
-﻿using Bliztard.Application.Model;
+﻿using Bliztard.Application.Core;
+using Bliztard.Application.Model;
 using Bliztard.Contract.Request;
-using Bliztard.Master.Repository.Machine;
 
 namespace Bliztard.Master.Service.Machine;
 
-public interface IMachineService
+public interface IMachineService : ILifecycle
 {
-    public IMachineRepository Repository  { get; }
-
     public bool Register(MachineInfoRequest machineInfo);
     
     public bool Unregister(Guid machineId);

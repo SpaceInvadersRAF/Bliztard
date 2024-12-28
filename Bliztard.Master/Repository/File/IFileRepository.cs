@@ -1,9 +1,9 @@
-﻿using System.Collections.Concurrent;
+﻿using Bliztard.Application.Core;
 using Bliztard.Application.Model;
 
 namespace Bliztard.Master.Repository.File;
 
-public interface IFileRepository
+public interface IFileRepository : ILifecycle
 {
     public bool SaveUpload(Guid machineId, string resource);
 

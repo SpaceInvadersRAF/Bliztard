@@ -5,27 +5,32 @@ namespace Bliztard.Master.Repository.Machine;
 
 public class MachineRepository : IMachineRepository
 {
-    public ConcurrentDictionary<Guid, MachineInfo> Machines { get; } = new();
+    private readonly ConcurrentDictionary<Guid, MachineInfo> m_Machines = new();
 
     public bool Add(MachineInfo machineInfo)
     {
-        return Machines.TryAdd(machineInfo.Id, machineInfo);
+        return m_Machines.TryAdd(machineInfo.Id, machineInfo);
     }
 
     public bool Remove(Guid machineId)
     {
-        return Machines.Remove(machineId, out _);
+        return m_Machines.Remove(machineId, out _);
     }
 
     public MachineInfo? Get(Guid machineId)
     {
-        Machines.TryGetValue(machineId, out var machineInfo);
+        m_Machines.TryGetValue(machineId, out var machineInfo);
         
         return machineInfo;
     }
 
-    public IEnumerable<MachineInfo> GetAll()
+    public IEnumerable<MachineInfo> Machines()
     {
-        return Machines.Values;
+        return m_Machines.Values;
+    }
+
+    public IDictionary<Guid, MachineInfo> GetAll()
+    {
+        return m_Machines;
     }
 }
