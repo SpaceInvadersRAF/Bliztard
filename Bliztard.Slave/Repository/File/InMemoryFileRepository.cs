@@ -4,31 +4,31 @@ namespace Bliztard.Slave.Repository.File;
 
 public class InMemoryFileRepository : IFileRepository
 {
-    public ConcurrentDictionary<string, MemoryStream> Files              { get; } = new();
-    public ConcurrentDictionary<string, string>       ResourceDictionary { get; } = new();
+    private readonly ConcurrentDictionary<string, MemoryStream> m_Files              = new();
+    private readonly ConcurrentDictionary<string, string>       m_ResourceDictionary = new();
 
     public Stream CreateStream(string path)
     {
-        return Files[path] = new MemoryStream();
+        return m_Files[path] = new MemoryStream();
     }
 
     public bool Save(string resource, Guid pathId)
     {
-        var streamOld  = Files[pathId.ToString()];
+        var streamOld  = m_Files[pathId.ToString()];
         var streamCopy = new MemoryStream();
         
         streamOld.Position = 0;
         streamOld.CopyTo(streamCopy);
 
-        Files[pathId.ToString()]     = streamCopy;
-        ResourceDictionary[resource] = pathId.ToString();
+        m_Files[pathId.ToString()]     = streamCopy;
+        m_ResourceDictionary[resource] = pathId.ToString();
 
         return true;
     }
 
     public Stream? Load(string resource)
     {
-        var stream = Files[ResourceDictionary[resource]];
+        var stream = m_Files[m_ResourceDictionary[resource]];
         stream.Position = 0;
         
         return stream;

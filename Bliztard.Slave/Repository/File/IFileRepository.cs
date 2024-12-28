@@ -1,6 +1,8 @@
-﻿namespace Bliztard.Slave.Repository.File;
+﻿using Bliztard.Slave.Application;
 
-public interface IFileRepository
+namespace Bliztard.Slave.Repository.File;
+
+public interface IFileRepository : ILifecycle
 {
     public Stream CreateStream(string path);
 

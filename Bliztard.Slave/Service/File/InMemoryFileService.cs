@@ -3,24 +3,25 @@ using Bliztard.Slave.Repository.File;
 
 namespace Bliztard.Slave.Service.File;
 
-public class InMemoryFileService(IFileRepository repository) : IFileService
+public class InMemoryFileService(IFileRepository repository, ILogger<InMemoryFileService> logger) : IFileService
 {
-    public IFileRepository Repository { get; } = repository;
+    private readonly ILogger<InMemoryFileService> m_Logger     = logger;
+    private readonly IFileRepository              m_Repository = repository;
 
     public Stream CreateStream(out Guid pathId)
     {
         pathId = Guid.NewGuid();
         
-        return Repository.CreateStream(pathId.ToString());
+        return m_Repository.CreateStream(pathId.ToString());
     }
 
     public bool Save(SaveFileInfo saveFileInfo)
     {
-        return Repository.Save(saveFileInfo.Resource, saveFileInfo.PathId);
+        return m_Repository.Save(saveFileInfo.Resource, saveFileInfo.PathId);
     }
 
     public Stream? Read(string resource)
     {
-        return Repository.Load(resource);
+        return m_Repository.Load(resource);
     }
 }
