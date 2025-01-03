@@ -34,10 +34,17 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
     {
         var fileInfo = new FileInfo(filePath);
 
-        var machineUrl = await FindUploadLocation(fileInfo);
+        var successful = false;
 
-        var successful = await UploadToMachine(fileInfo, machineUrl);
-        
+        try
+        {
+            var machineUrl = await FindUploadLocation(fileInfo);
+
+            successful = await UploadToMachine(fileInfo, machineUrl);
+        }
+        catch { /*ignored*/ }
+
+
         Console.WriteLine(successful ? $"File {fileInfo.Name} has been successfully uploaded." : $"File {fileInfo.Name} upload has failed.");
     }
 

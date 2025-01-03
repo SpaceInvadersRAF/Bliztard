@@ -32,10 +32,8 @@ public class HelpCommand() : Command(key: Configuration.Command.Help,
                          .Append(' ')
                          .AppendLine(string.Join(' ', command.Arguments));
         }
-            
-            
-        stringBuilder.AppendLine('-'.Repeat(width))
-                     .Append("> ");
+        
+        stringBuilder.AppendLine('-'.Repeat(width));
 
         Console.Write(stringBuilder);
         

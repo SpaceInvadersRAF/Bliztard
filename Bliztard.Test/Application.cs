@@ -9,7 +9,7 @@ namespace Bliztard.Test;
 
 public class Application
 {
-    private Command m_CurrentCommand = Command.DefaultCommand; 
+    private Command m_CurrentCommand = Command.StartUpCommand; 
 
     public void Run()
     {

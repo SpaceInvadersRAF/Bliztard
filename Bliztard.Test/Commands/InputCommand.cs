@@ -8,6 +8,7 @@ public class InputCommand() : Command(key: Configuration.Command.Input,
 {
     public override Command Execute(params string[] arguments)
     {
+        Console.Write("> ");
         string? input = Console.ReadLine();
         
         if (input is null)

@@ -1,10 +1,12 @@
 ﻿using Bliztard.Application.Core;
+using Bliztard.Test.Configurations;
 
 namespace Bliztard.Test.Commands;
 
 public abstract class Command(string key, string description = "", string[]? arguments = null, bool exit = false, bool display = true) : ILifecycle
 {
-    public static Command DefaultCommand => Commands["help"];
+    public static Command StartUpCommand => Commands[Configuration.Command.Help];
+    public static Command DefaultCommand => Commands[Configuration.Command.Input];
 
     protected static readonly Dictionary<string, Command> Commands = new();
     
