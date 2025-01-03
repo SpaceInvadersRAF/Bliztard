@@ -87,7 +87,7 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
         
         var content = new MultipartFormDataContent();
 
-        var stream = m_FileService.Read(saveFileInfo.Resource);
+        await using var stream = m_FileService.Read(saveFileInfo.Resource);
         
         if (stream == null)
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -102,7 +102,7 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
     [HttpGet(Configuration.Endpoint.Files.Download)]
     public async Task<IActionResult> Download([FromForm(Name = "username")] string username, [FromForm(Name = "path")] string path)
     {
-        var stream = m_FileService.Read($"{username}/{path}");
+        await using var stream = m_FileService.Read($"{username}/{path}");
         
         if (stream == null)
             return NotFound();

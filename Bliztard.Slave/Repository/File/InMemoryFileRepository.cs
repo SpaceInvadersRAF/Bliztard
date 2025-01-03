@@ -14,23 +14,35 @@ public class InMemoryFileRepository : IFileRepository
 
     public bool Save(string resource, Guid pathId)
     {
-        var streamOld  = m_Files[pathId.ToString()];
-        var streamCopy = new MemoryStream();
+        var streamCopy = CreateStreamCopy(m_Files[pathId.ToString()]);
         
-        streamOld.Position = 0;
-        streamOld.CopyTo(streamCopy);
-
         m_Files[pathId.ToString()]     = streamCopy;
         m_ResourceDictionary[resource] = pathId.ToString();
-
+        
         return true;
     }
 
     public Stream? Load(string resource)
     {
-        var stream = m_Files[m_ResourceDictionary[resource]];
-        stream.Position = 0;
+        if (!m_ResourceDictionary.TryGetValue(resource, out var pathId))
+            return null;
+
+        if (!m_Files.TryGetValue(pathId, out var stream))
+            return null;
+
+        var newStream = CreateStreamCopy(stream);
+        newStream.Position = 0;
         
-        return stream;
+        return newStream;
+    }
+
+    private MemoryStream CreateStreamCopy(MemoryStream stream)
+    {
+        var streamCopy = new MemoryStream();
+
+        stream.Position = 0;
+        stream.CopyTo(streamCopy);
+        
+        return streamCopy;
     }
 }
