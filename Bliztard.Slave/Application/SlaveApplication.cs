@@ -55,7 +55,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBliztardApplication(this IServiceCollection services)
     {
-        services.AddMachine(MachineType.Slave);
+        services.AddMachine(MachineType.Slave, out var machineInfo);
 
         services.AddHostedService<ApplicationHostedService>();
 
@@ -68,21 +68,25 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient(Configuration.HttpClient.FileNotifyUpload,
                                client =>
                                {
+                                   client.DefaultRequestHeaders.UserAgent.ParseAdd($"Bliztard/{machineInfo.Type} ({machineInfo.Id})");
                                    client.BaseAddress = new Uri(Configuration.Core.MasterBaseUrl);
                                });
         services.AddHttpClient(Configuration.HttpClient.FileTwincateData,
                                client =>
                                {
+                                   client.DefaultRequestHeaders.UserAgent.ParseAdd($"Bliztard/{machineInfo.Type} ({machineInfo.Id})");
                                    client.BaseAddress = new Uri(Configuration.Core.MasterBaseUrl);
                                });
         services.AddHttpClient(Configuration.HttpClient.MachineNotifyMaster,
                                client =>
                                {
+                                   client.DefaultRequestHeaders.UserAgent.ParseAdd($"Bliztard/{machineInfo.Type} ({machineInfo.Id})");
                                    client.BaseAddress = new Uri(Configuration.Core.MasterBaseUrl);
                                });
         services.AddHttpClient(Configuration.HttpClient.MachineSendUroshbeat,
                                client =>
                                {
+                                   client.DefaultRequestHeaders.UserAgent.ParseAdd($"Bliztard/{machineInfo.Type} ({machineInfo.Id})");
                                    client.BaseAddress = new Uri(Configuration.Core.MasterBaseUrl);
                                });
         

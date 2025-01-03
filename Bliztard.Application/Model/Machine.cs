@@ -2,10 +2,10 @@
 
 public class MachineInfo
 {
-    public Guid            Id       { init; get; } 
+    public Guid            Id       { init; get; } = Guid.NewGuid();
     public MachineType     Type     { init; get; }
     public MachineResource Resource { init; get; } = new();
-    public bool            Alive    { set;  get; }
+    public bool            Alive    { set;  get; } = true;
 }
 
 public readonly struct MachineType(int value)
@@ -14,6 +14,11 @@ public readonly struct MachineType(int value)
     public static readonly MachineType Slave  = new(1);
     
     public int Value { get; } = value;
+
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
 
     public static implicit operator MachineType(int value)
     {

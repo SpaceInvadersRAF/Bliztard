@@ -43,7 +43,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBliztardApplication(this IServiceCollection services)
     {
-        services.AddMachine(MachineType.Master);
+        services.AddMachine(MachineType.Master, out _);
 
         services.AddHostedService<ApplicationHostedService>();
         

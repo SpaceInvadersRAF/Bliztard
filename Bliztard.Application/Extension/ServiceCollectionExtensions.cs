@@ -6,14 +6,11 @@ namespace Bliztard.Application.Extension;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddMachine(this IServiceCollection services, MachineType type)
+    public static IServiceCollection AddMachine(this IServiceCollection services, MachineType type, out MachineInfo outMachineInfo)
     {
-        services.AddSingleton<MachineInfo>(_ => new MachineInfo()
-                                                {
-                                                    Id    = Guid.NewGuid(),
-                                                    Type  = type,
-                                                    Alive = true,
-                                                });
+        var machineInfo = outMachineInfo = new MachineInfo() { Type = type };
+        
+        services.AddSingleton<MachineInfo>(_ => machineInfo);
         
         return services;
     }
