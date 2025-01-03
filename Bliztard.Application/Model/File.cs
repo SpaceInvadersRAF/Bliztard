@@ -1,5 +1,4 @@
-﻿using Bliztard.Application.Configuration;
-using Bliztard.Application.Extension;
+﻿using Bliztard.Application.Extension;
 
 namespace Bliztard.Application.Model;
 
@@ -25,6 +24,6 @@ public class SaveFileInfo
         Length      = length;
         ContentType = contentType;
         Username    = formData.TryGetString("username");
-        Replication = int.TryParse(formData.TryGetString("replications"), out var replicationFactor) ? replicationFactor : Configurations.Core.ReplicationFactor;
+        Replication = int.TryParse(formData.TryGetString("replications"), out var replicationFactor) ? replicationFactor : Configurations.Configuration.Core.ReplicationFactor;
     }
 }

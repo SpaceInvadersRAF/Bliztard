@@ -1,4 +1,4 @@
-﻿using Bliztard.Application.Configuration;
+﻿using Bliztard.Application.Configurations;
 using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
 
@@ -33,13 +33,13 @@ public class MachineService(MachineInfo machineInfo, ILogger<MachineService> log
     {
         m_Logger.LogDebug("Machine with id '{machineId}' has notified the master.", m_MachineInfo.Id);
 
-        var httpClient = m_HttpClientFactory.CreateClient(Configurations.HttpClient.MachineNotifyMaster);
+        var httpClient = m_HttpClientFactory.CreateClient(Configuration.HttpClient.MachineNotifyMaster);
         
-        var response = await httpClient.PostAsJsonAsync(Configurations.Endpoint.Machine.Register, m_MachineInfo.ToRequest(), m_CancellationToken.Token);
+        var response = await httpClient.PostAsJsonAsync(Configuration.Endpoint.Machine.Register, m_MachineInfo.ToRequest(), m_CancellationToken.Token);
         
         response.EnsureSuccessStatusCode();
 
-        m_HeartbeatTimer = new Timer((_ => Task.Run(MetroOnTheHeartBeatAsync)), this, TimeSpan.Zero, Configurations.Interval.UroshbeatDelay);
+        m_HeartbeatTimer = new Timer((_ => Task.Run(MetroOnTheHeartBeatAsync)), this, TimeSpan.Zero, Configuration.Interval.UroshbeatDelay);
         
         return response;
     }
@@ -48,9 +48,9 @@ public class MachineService(MachineInfo machineInfo, ILogger<MachineService> log
     {
         m_Logger.LogDebug("Machine with id '{machineId}' has sent a heartbeat.", m_MachineInfo.Id);
 
-        var httpClient = m_HttpClientFactory.CreateClient(Configurations.HttpClient.MachineSendUroshbeat);
+        var httpClient = m_HttpClientFactory.CreateClient(Configuration.HttpClient.MachineSendUroshbeat);
         
-        var response = await httpClient.GetAsync(Configurations.Endpoint.Machine.AcceptHeartbeat.Replace("{{machineId}}", m_MachineInfo.Id.ToString()), m_CancellationToken.Token);
+        var response = await httpClient.GetAsync(Configuration.Endpoint.Machine.AcceptHeartbeat.Replace("{machineId}", m_MachineInfo.Id.ToString()), m_CancellationToken.Token);
         
         response.EnsureSuccessStatusCode();
         

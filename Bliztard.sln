@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bliztard.Application", "Bli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bliztard.Contract", "Bliztard.Contract\Bliztard.Contract.csproj", "{FF68C2B6-615A-45E4-9CAF-BC83423A53F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bliztard.Test", "Bliztard.Test\Bliztard.Test.csproj", "{DA4EB75A-DBDA-4DCA-A19C-22693D97B8BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,5 +37,9 @@ Global
 		{FF68C2B6-615A-45E4-9CAF-BC83423A53F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF68C2B6-615A-45E4-9CAF-BC83423A53F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF68C2B6-615A-45E4-9CAF-BC83423A53F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA4EB75A-DBDA-4DCA-A19C-22693D97B8BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA4EB75A-DBDA-4DCA-A19C-22693D97B8BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA4EB75A-DBDA-4DCA-A19C-22693D97B8BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA4EB75A-DBDA-4DCA-A19C-22693D97B8BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

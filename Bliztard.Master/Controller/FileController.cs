@@ -1,4 +1,4 @@
-﻿using Bliztard.Application.Configuration;
+﻿using Bliztard.Application.Configurations;
 using Bliztard.Application.Model;
 using Bliztard.Contract.Request;
 using Bliztard.Master.Service.File;
@@ -13,7 +13,7 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
     private readonly IFileService               m_FileService = fileService;
     private readonly ILogger<MachineController> m_Logger      = logger;
 
-    [HttpPost(Configurations.Endpoint.Files.NotifyUpload)]
+    [HttpPost(Configuration.Endpoint.Files.NotifyUpload)]
     public IActionResult NotifyUpload([FromBody] NotifySaveRequest request)
     {
         if (!m_FileService.RegisterFile(request))  
@@ -22,7 +22,7 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
         return Ok();
     }
     
-    [HttpPost(Configurations.Endpoint.Files.Locate)]
+    [HttpPost(Configuration.Endpoint.Files.Locate)]
     public IActionResult Locate([FromForm(Name = "username")] string username, [FromForm(Name = "path")] string path)
     {
         var machineInfo = m_FileService.LocateFile($"{username}/{path}");

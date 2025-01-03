@@ -1,6 +1,6 @@
-﻿namespace Bliztard.Application.Configuration;
+﻿namespace Bliztard.Application.Configurations;
 
-public partial struct Configurations
+public partial struct Configuration
 {
     public partial struct Core { }
     

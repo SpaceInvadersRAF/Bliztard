@@ -1,4 +1,4 @@
-﻿using Bliztard.Application.Configuration;
+﻿using Bliztard.Application.Configurations;
 using Bliztard.Application.Extension;
 using Bliztard.Application.Model;
 using Bliztard.Slave.Repository.File;
@@ -65,25 +65,25 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<ApplicationServiceLifecycle>();
 
-        services.AddHttpClient(Configurations.HttpClient.FileNotifyUpload,
+        services.AddHttpClient(Configuration.HttpClient.FileNotifyUpload,
                                client =>
                                {
-                                   client.BaseAddress = new Uri(Configurations.Core.MasterBaseUrl);
+                                   client.BaseAddress = new Uri(Configuration.Core.MasterBaseUrl);
                                });
-        services.AddHttpClient(Configurations.HttpClient.FileTwincateData,
+        services.AddHttpClient(Configuration.HttpClient.FileTwincateData,
                                client =>
                                {
-                                   client.BaseAddress = new Uri(Configurations.Core.MasterBaseUrl);
+                                   client.BaseAddress = new Uri(Configuration.Core.MasterBaseUrl);
                                });
-        services.AddHttpClient(Configurations.HttpClient.MachineNotifyMaster,
+        services.AddHttpClient(Configuration.HttpClient.MachineNotifyMaster,
                                client =>
                                {
-                                   client.BaseAddress = new Uri(Configurations.Core.MasterBaseUrl);
+                                   client.BaseAddress = new Uri(Configuration.Core.MasterBaseUrl);
                                });
-        services.AddHttpClient(Configurations.HttpClient.MachineSendUroshbeat,
+        services.AddHttpClient(Configuration.HttpClient.MachineSendUroshbeat,
                                client =>
                                {
-                                   client.BaseAddress = new Uri(Configurations.Core.MasterBaseUrl);
+                                   client.BaseAddress = new Uri(Configuration.Core.MasterBaseUrl);
                                });
         
         return services;

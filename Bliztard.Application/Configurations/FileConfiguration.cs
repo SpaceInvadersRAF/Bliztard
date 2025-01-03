@@ -1,6 +1,6 @@
-﻿namespace Bliztard.Application.Configuration;
+﻿namespace Bliztard.Application.Configurations;
 
-public partial struct Configurations
+public partial struct Configuration
 {
     public partial struct Core
     {
@@ -25,6 +25,7 @@ public partial struct Configurations
             public  const string Download     = $"{Base}/download";
             public  const string NotifyUpload = $"{Base}/notify-upload";
             public  const string Locate       = $"{Base}/locate";
+            public  const string Replicate    = $"{Base}/replicate";
         }
     }
 }

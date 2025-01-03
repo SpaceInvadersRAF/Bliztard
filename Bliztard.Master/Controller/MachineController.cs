@@ -1,4 +1,4 @@
-﻿using Bliztard.Application.Configuration;
+﻿using Bliztard.Application.Configurations;
 using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
 using Bliztard.Contract.Request;
@@ -16,7 +16,7 @@ public class MachineController(IMachineService machineService, IHttpClientFactor
     private readonly ILogger<MachineController> m_Logger         = logger;
     private readonly MachineInfo                m_MachineInfo    = machineInfo;
     
-    [HttpPost(Configurations.Endpoint.Machine.UploadLocations)]
+    [HttpPost(Configuration.Endpoint.Machine.UploadLocations)]
     public IActionResult UploadLocations([FromBody] UploadLocationsRequest request)
     {
         var machineInfos = m_MachineService.AllSlavesWillingToAcceptFile(request).ToList();
@@ -31,7 +31,7 @@ public class MachineController(IMachineService machineService, IHttpClientFactor
     /// </summary>
     /// <param name="machineInfo"></param>
     /// <returns></returns>
-    [HttpPost(Configurations.Endpoint.Machine.Register)]
+    [HttpPost(Configuration.Endpoint.Machine.Register)]
     public IActionResult Register([FromBody] MachineInfoRequest machineInfo)
     {
         if (!m_MachineService.Register(machineInfo))
@@ -49,7 +49,7 @@ public class MachineController(IMachineService machineService, IHttpClientFactor
     /// </summary>
     /// <param name="machineId"></param>
     /// <returns></returns>
-    [HttpGet(Configurations.Endpoint.Machine.AcceptHeartbeat)]   
+    [HttpGet(Configuration.Endpoint.Machine.AcceptHeartbeat)]   
     public IActionResult AcceptHeartbeat([FromRoute] Guid machineId)
     {
         if (!m_MachineService.Uroshbeat(machineId))
