@@ -14,15 +14,11 @@ public class MachineService(MachineInfo machineInfo, ILogger<MachineService> log
     
     public void OnStart()
     {
-        m_Logger.LogDebug("Start {service} service.", nameof(MachineService));
-        
         Task.Run(NotifyMasterAsync);
     }
 
     public void OnStop()
     {
-        m_Logger.LogDebug("Stop {service} service.", nameof(MachineService));
-
         m_CancellationToken.Cancel();
         
         m_HeartbeatTimer?.Change(Timeout.Infinite, 0);
@@ -31,7 +27,7 @@ public class MachineService(MachineInfo machineInfo, ILogger<MachineService> log
 
     public async Task<HttpResponseMessage> NotifyMasterAsync()
     {
-        m_Logger.LogDebug("Machine with id '{machineId}' has notified the master.", m_MachineInfo.Id);
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Notify Deployment", DateTime.Now, m_MachineInfo.Id);
 
         var httpClient = m_HttpClientFactory.CreateClient(Configuration.HttpClient.MachineNotifyMaster);
         
@@ -46,7 +42,7 @@ public class MachineService(MachineInfo machineInfo, ILogger<MachineService> log
 
     private async Task<HttpResponseMessage> MetroOnTheHeartBeatAsync()
     {
-        m_Logger.LogDebug("Machine with id '{machineId}' has sent a heartbeat.", m_MachineInfo.Id);
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId}' | Send Heartbeat", DateTime.Now, m_MachineInfo.Id);
 
         var httpClient = m_HttpClientFactory.CreateClient(Configuration.HttpClient.MachineSendUroshbeat);
         

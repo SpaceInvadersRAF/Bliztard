@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <PackageReference Include="Lombok.NET" Version="2.4.1" />
+      <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     </ItemGroup>
 
     <ItemGroup>

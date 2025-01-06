@@ -6,6 +6,8 @@ using Bliztard.Slave.Service;
 using Bliztard.Slave.Service.File;
 using Bliztard.Slave.Service.Machine;
 using Microsoft.AspNetCore.Http.Features;
+using Serilog;
+using Serilog.Events;
 
 namespace Bliztard.Slave.Application;
 
@@ -20,8 +22,15 @@ public class SlaveApplication
                                          {
                                              options.IncludeScopes   = false;
                                              options.SingleLine      = true;
-                                             options.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
+                                             options.TimestampFormat = $"{Configuration.Log.TimestampFormat} ";
                                          });
+        builder.Logging.AddSerilog(new LoggerConfiguration().MinimumLevel.Warning()
+                                                            .MinimumLevel.Override(typeof(Program).Namespace!, LogEventLevel.Debug)
+                                                            .WriteTo.File(path: Configuration.Log.FilePath,
+                                                                          rollingInterval: RollingInterval.Day,
+                                                                          outputTemplate: Configuration.Log.Serilog.OutputTemplate,
+                                                                          shared: Configuration.Log.Shared)
+                                                            .CreateLogger());
         
         builder.WebHost.ConfigureKestrel((_, options) =>
                                          {

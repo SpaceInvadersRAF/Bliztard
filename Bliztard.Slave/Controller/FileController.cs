@@ -32,6 +32,8 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
         var             contentType = "";
         await using var stream      = m_FileService.CreateStream(out var pathId);
         
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | PathId: {PathId} | Start Upload", DateTime.Now, m_MachineInfo.Id, pathId);
+        
         while (await reader.ReadNextSectionAsync() is { } section)
         {
             var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
@@ -55,6 +57,8 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
         
         var saveFileInfo = new SaveFileInfo(m_MachineInfo, pathId, formData, contentType, stream.Length);
         
+        m_Logger.LogInformation("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Resource: {Resource} | PathId: {PathId} | Save File", DateTime.Now, m_MachineInfo.Id, saveFileInfo.Resource, pathId);
+
         if (!m_FileService.Save(saveFileInfo)) 
             return BadRequest();
         
@@ -68,7 +72,7 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
     {
         var httpClient = m_HttpClientFactory.CreateClient(Configuration.HttpClient.FileNotifyUpload);
         
-        m_Logger.LogDebug("Notify Master - Dusan about upload of '{resource}' on machine {machineId}.", saveFileInfo.Resource, saveFileInfo.MachineInfo.Id);
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Resource: {Resource} | Notify Master", DateTime.Now, m_MachineInfo.Id, saveFileInfo.Resource);
         
         return await httpClient.PostAsJsonAsync(Configuration.Endpoint.Files.NotifyUpload, saveFileInfo.ToRequest());
     }
@@ -94,7 +98,7 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
 
         content.AddTwincate(saveFileInfo, stream);
         
-        m_Logger.LogDebug("Twincate resource '{resource}' from machine {machineId} to machine {machineId}.", saveFileInfo.Resource, saveFileInfo.MachineInfo.Id, machineInfo.Id);
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Resource: {Resource} | ReplicationId: {ReplicationId} | Twincate", DateTime.Now, m_MachineInfo.Id, saveFileInfo.Resource, machineInfo.Id);
         
         return await httpClient.PostAsync($"{machineInfo.BaseUrl}/{Configuration.Endpoint.Files.Upload}", content);
     }

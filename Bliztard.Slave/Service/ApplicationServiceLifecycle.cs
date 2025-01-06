@@ -18,7 +18,7 @@ public class ApplicationServiceLifecycle(ILogger<ApplicationServiceLifecycle> lo
 
     public void OnApplicationStarted()
     {
-        m_Logger.LogInformation("Application has started.");
+        m_Logger.LogInformation("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Application Started", DateTime.Now, m_MachineInfo.Id);
 
         m_MachineInfo.Resource.BaseUrl = Urls.First();
         
@@ -28,7 +28,7 @@ public class ApplicationServiceLifecycle(ILogger<ApplicationServiceLifecycle> lo
 
     public void OnApplicationStopped()
     {
-        m_Logger.LogInformation("Application has stopped.");
+        m_Logger.LogInformation("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Application Stopped", DateTime.Now, m_MachineInfo.Id);
         
         foreach (var service in ServiceLifecycles)
             service.OnStop();
