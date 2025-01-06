@@ -1,10 +1,13 @@
-﻿using Bliztard.Application.Extension;
+﻿using Bliztard.Application.Configurations;
+using Bliztard.Application.Extension;
 using Bliztard.Application.Model;
 using Bliztard.Master.Repository.File;
 using Bliztard.Master.Repository.Machine;
 using Bliztard.Master.Service;
 using Bliztard.Master.Service.File;
 using Bliztard.Master.Service.Machine;
+using Serilog;
+using Serilog.Events;
 
 namespace Bliztard.Master.Application;
 
@@ -19,8 +22,15 @@ public class MasterApplication
                                          {
                                              options.IncludeScopes   = false;
                                              options.SingleLine      = true;
-                                             options.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
+                                             options.TimestampFormat = $"{Configuration.Log.TimestampFormat} ";
                                          });
+        builder.Logging.AddSerilog(new LoggerConfiguration().MinimumLevel.Warning()
+                                                            .MinimumLevel.Override(typeof(Program).Namespace!, LogEventLevel.Debug)
+                                                            .WriteTo.File(path: Configuration.Log.FilePath,
+                                                                          rollingInterval: RollingInterval.Day,
+                                                                          outputTemplate: Configuration.Log.Serilog.OutputTemplate,
+                                                                          shared: Configuration.Log.Shared)
+                                                            .CreateLogger());
         
         builder.Services.AddHttpClient();
         builder.Services.AddHttpContextAccessor();

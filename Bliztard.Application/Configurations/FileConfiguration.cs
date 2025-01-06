@@ -5,7 +5,7 @@ public partial struct Configuration
     public partial struct Core
     {
         public static readonly int    ReplicationFactor = 3;
-        public static readonly string MasterBaseUrl     = "http://localhost:3031";
+        public static readonly string MasterBaseUrl     = Environment.GetEnvironmentVariable("BLIZTARD_MASTER_BASE_URL") ?? "http://localhost:3031";
     }
     
     public partial struct HttpClient

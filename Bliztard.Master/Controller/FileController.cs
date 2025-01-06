@@ -16,8 +16,14 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
     [HttpPost(Configuration.Endpoint.Files.NotifyUpload)]
     public IActionResult NotifyUpload([FromBody] NotifySaveRequest request)
     {
-        if (!m_FileService.RegisterFile(request))  
+        if (!m_FileService.RegisterFile(request))
+        {
+            m_Logger.LogError("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Resource {Resource} | File Registration Failed", DateTime.Now, request.MachineInfo.Id, request.Resource);
+            
             return BadRequest();
+        }
+        
+        m_Logger.LogError("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Resource {Resource} | File Registration Succeeded", DateTime.Now, request.MachineInfo.Id, request.Resource);
         
         return Ok();
     }

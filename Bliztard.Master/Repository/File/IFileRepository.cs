@@ -10,4 +10,6 @@ public interface IFileRepository : ILifecycle
     public MachineInfo? RetrieveMachine(string resource);
 
     public bool IsResourceOnMachine(Guid machineId, string resource);
+
+    public bool SaveTransient(Guid machineId, string resource);
 }

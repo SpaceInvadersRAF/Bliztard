@@ -17,6 +17,7 @@
       <PackageReference Include="FubarDev.FtpServer" Version="3.1.2" />
       <PackageReference Include="FubarDev.FtpServer.FileSystem.DotNet" Version="3.1.2" />
       <PackageReference Include="Lombok.NET" Version="2.4.1" />
+      <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
       <PackageReference Include="TaskScheduler" Version="2.11.0" />
     </ItemGroup>
 

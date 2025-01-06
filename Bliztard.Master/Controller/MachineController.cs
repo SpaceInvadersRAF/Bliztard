@@ -21,26 +21,25 @@ public class MachineController(IMachineService machineService, IHttpClientFactor
     {
         var machineInfos = m_MachineService.AllSlavesWillingToAcceptFile(request).ToList();
         
-        m_Logger.LogDebug("Upload locations for resource '{resource}' are {machineIds}", request.Resource, string.Join(", ", machineInfos.Select(machineInfo => machineInfo.Id)));
-        
         return Ok(new UploadLocationsResponse() { MachineInfos = machineInfos.ToResponse() });
     }
     
     /// <summary>
     /// kad se slave spawnuje da kaze Bliztard.Master-u da je spreman da se koristi
     /// </summary>
-    /// <param name="machineInfo"></param>
+    /// <param name="machineInfoRequest"></param>
     /// <returns></returns>
     [HttpPost(Configuration.Endpoint.Machine.Register)]
-    public IActionResult Register([FromBody] MachineInfoRequest machineInfo)
+    public IActionResult Register([FromBody] MachineInfoRequest machineInfoRequest)
     {
-        if (!m_MachineService.Register(machineInfo))
+        if (!m_MachineService.Register(machineInfoRequest))
         {
-            m_Logger.LogInformation("Failed to register machine. Machine with id: '{machineId}' already exists.", machineInfo.Id);
+            m_Logger.LogWarning("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Machine Registration Failed", DateTime.Now, machineInfoRequest.Id);
             return BadRequest();
         }
         
-        m_Logger.LogInformation("Successful machine registration. Machine id: '{machineId}'.", machineInfo.Id);
+        m_Logger.LogInformation("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Machine Registration Succeeded", DateTime.Now, machineInfoRequest.Id);
+
         return Ok(m_MachineInfo);
     }
     
@@ -54,11 +53,13 @@ public class MachineController(IMachineService machineService, IHttpClientFactor
     {
         if (!m_MachineService.Uroshbeat(machineId))
         {
-            m_Logger.LogDebug("Cannot process heartbeat. Machine with id: '{machineId}' is not registered.", machineId);
+            m_Logger.LogWarning("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Heartbeat Rejected", DateTime.Now, machineInfo.Id);
+            
             return BadRequest();
         }
-        
-        m_Logger.LogDebug("Heartbeat accepted. Machine id: '{machineId}'.", machineId);
+
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Heartbeat Accepted", DateTime.Now, machineInfo.Id);
+
         return Ok();
     }
     
