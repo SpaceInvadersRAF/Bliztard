@@ -21,7 +21,6 @@ public static class SaveFileInfoMapper
     {
         return new UploadLocationsRequest
                {
-                   MachineInfo = saveFileInfo.MachineInfo.ToRequest(),
                    FilePath    = saveFileInfo.FilePath,
                    Username    = saveFileInfo.Username,
                    Length      = saveFileInfo.Length,

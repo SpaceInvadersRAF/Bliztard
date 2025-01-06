@@ -54,13 +54,6 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
 
         var request = new UploadLocationsRequest()
                       {
-                          MachineInfo = new MachineInfoRequest()
-                                        {
-                                            Id = Guid.Empty,
-                                            Alive = false,
-                                            BaseUrl = "",
-                                            Type = 0
-                                        },
                           FilePath = fileInfo.Name,
                           Length   = fileInfo.Length,
                           Username = "Urosh<3"
