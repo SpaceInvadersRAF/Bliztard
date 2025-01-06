@@ -11,19 +11,19 @@ public class MachineService(IMachineRepository repository, IFileRepository fileR
     private readonly ILogger<MachineService> m_Logger         = logger; 
     private readonly IMachineRepository      m_Repository     = repository;
     private readonly IFileRepository         m_FileRepository = fileRepository;
-    private readonly object                  m_Lock           = new();
-    private          int                     m_CurrentIndex   = 0;
-    private          Timer?                  m_MassMurderTimer; 
+    
+    private readonly object m_Lock            = new();
+    private readonly object m_LockNew         = new();
+    private          int    m_CurrentIndex    = 0;
+    private          Timer? m_MassMurderTimer;
     
     public void OnStart()
     {
-        m_MassMurderTimer = new Timer((_ => MassMurderOnTheBeatSoItsNotNice()), this, TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(8));
+        m_MassMurderTimer = new Timer(_ => MassMurderOnTheBeatSoItsNotNice(), this, TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(8));
     }
 
     public void OnStop()
     {
-        m_Logger.LogDebug("Stop {service} service.", nameof(MachineService));
-        
         m_MassMurderTimer?.Change(Timeout.Infinite, 0);
         m_MassMurderTimer?.Dispose();
     }
@@ -32,9 +32,7 @@ public class MachineService(IMachineRepository repository, IFileRepository fileR
     {
         foreach (var (machineId, machineInfo) in m_Repository.GetAll())
             if (!machineInfo.Alive ^ (machineInfo.Alive = false) && Unregister(machineId))
-                m_Logger.LogDebug("Machine with id: {machine} has been successfully murdered!", machineId);
-
-        m_Logger.LogDebug("Mass Murder happened to {count} machines!", m_Repository.GetAll().Count);
+                m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {Resource} | Machine Is Murdered", DateTime.Now, machineId);
     }
 
     public bool Register(MachineInfoRequest machineInfo) 
@@ -60,16 +58,35 @@ public class MachineService(IMachineRepository repository, IFileRepository fileR
         lock (m_Lock)
             startIndex = m_CurrentIndex = (m_CurrentIndex + 1) % machines.Count;
         
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | Resource: {Resource} | StartIndex {StartIndex} | Find Machine", DateTime.Now, request.Resource, startIndex);
+
         bool firstRound = true;
         
         for (int currentIndex = startIndex; firstRound || currentIndex < startIndex; ++currentIndex)
         {
-            if (!m_FileRepository.IsResourceOnMachine(machines[currentIndex].Id, request.Resource))
-                return [machines[currentIndex]];
             
+            var currentMachine = machines[currentIndex];
+            
+            m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | Resource: {Resource} | CurrentIndex {CurrentIndex} | MachineId: {MachineId} | Current Machine", DateTime.Now,  request.Resource, currentIndex, currentMachine.Id);
+            
+            lock (m_LockNew)
+            {
+                if (!m_FileRepository.IsResourceOnMachine(currentMachine.Id, request.Resource))
+                {
+                    m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | Resource: {Resource} | CurrentIndex {CurrentIndex} | MachineId: {MachineId} | Machine is Found", DateTime.Now,  request.Resource, currentIndex, currentMachine.Id);
+                    
+                    if (!m_FileRepository.SaveTransient(currentMachine.Id, request.Resource))
+                        continue;
+                    
+                    return [currentMachine];
+                }
+            }
+
             if (currentIndex == machines.Count - 1 && !(firstRound = false))
                 currentIndex = -1;
         }
+
+        m_Logger.LogDebug("Timestamp : {Timestamp:HH:mm:ss.ffffff} | Master | Resource: {Resource} | StartIndex {StartIndex} | Machine Not Found", DateTime.Now, request.Resource, startIndex);
 
         return [];
     }
