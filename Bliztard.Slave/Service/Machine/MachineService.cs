@@ -1,13 +1,15 @@
-﻿using Bliztard.Application.Configurations;
+﻿using System.ComponentModel;
+using Bliztard.Application.Configurations;
 using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
+using Bliztard.Slave.Service.Network;
 
 namespace Bliztard.Slave.Service.Machine;
 
-public class MachineService(MachineInfo machineInfo, ILogger<MachineService> logger, IHttpClientFactory httpClientFactory) : IMachineService
+public class MachineService(MachineInfo machineInfo, ILogger<MachineService> logger, INetworkService networkService) : IMachineService
 {
+    private readonly INetworkService         m_NetworkService    = networkService;
     private readonly ILogger<MachineService> m_Logger            = logger; 
-    private readonly IHttpClientFactory      m_HttpClientFactory = httpClientFactory;
     private readonly MachineInfo             m_MachineInfo       = machineInfo;
     private readonly CancellationTokenSource m_CancellationToken = new();
     private          Timer?                  m_HeartbeatTimer;
@@ -27,14 +29,10 @@ public class MachineService(MachineInfo machineInfo, ILogger<MachineService> log
 
     public async Task<HttpResponseMessage> NotifyMasterAsync()
     {
-        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Notify Deployment", DateTime.Now, m_MachineInfo.Id);
-
-        var httpClient = m_HttpClientFactory.CreateClient(Configuration.HttpClient.MachineNotifyMaster);
         
-        var response = await httpClient.PostAsJsonAsync(Configuration.Endpoint.Machine.Register, m_MachineInfo.ToRequest(), m_CancellationToken.Token);
-        
+        var response = await m_NetworkService.NotifyMaster(m_MachineInfo, m_CancellationToken);
         response.EnsureSuccessStatusCode();
-
+        
         m_HeartbeatTimer = new Timer((_ => Task.Run(MetroOnTheHeartBeatAsync)), this, TimeSpan.Zero, Configuration.Interval.UroshbeatDelay);
         
         return response;
@@ -42,12 +40,7 @@ public class MachineService(MachineInfo machineInfo, ILogger<MachineService> log
 
     private async Task<HttpResponseMessage> MetroOnTheHeartBeatAsync()
     {
-        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId}' | Send Heartbeat", DateTime.Now, m_MachineInfo.Id);
-
-        var httpClient = m_HttpClientFactory.CreateClient(Configuration.HttpClient.MachineSendUroshbeat);
-        
-        var response = await httpClient.GetAsync(Configuration.Endpoint.Machine.AcceptHeartbeat.Replace("{machineId}", m_MachineInfo.Id.ToString()), m_CancellationToken.Token);
-        
+        var response = await m_NetworkService.MetroOnTheHeartBeat(m_MachineInfo, m_CancellationToken);
         response.EnsureSuccessStatusCode();
         
         return response;

@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using Bliztard.Application.Model;
+using Bliztard.Contract.Request;
 
 namespace Bliztard.Application.Extension;
 
@@ -16,4 +17,16 @@ public static class MultipartFormDataContentExtensions
         
         content.Add(fileStream, "file", saveFileInfo.FileName);
     }
-}
+
+    public static void AddTwincate(this MultipartFormDataContent content, TwincateFileRequest twincateFile, Stream file)
+    {
+        content.Add(new StringContent(twincateFile.Username), "username");
+        content.Add(new StringContent(twincateFile.FilePath), "path");
+        
+        var fileStream = new StreamContent(file);
+        
+        fileStream.Headers.ContentType = new MediaTypeHeaderValue(twincateFile.ContentType.MediaType);
+        
+        content.Add(fileStream, "file", twincateFile.FileName);
+    }
+} 

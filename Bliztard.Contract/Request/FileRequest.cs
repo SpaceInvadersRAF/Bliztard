@@ -1,13 +1,26 @@
-﻿namespace Bliztard.Contract.Request;
+﻿using System.Net.Mime;
 
-public readonly struct NotifySaveRequest 
+namespace Bliztard.Contract.Request;
+
+public readonly struct NotifySaveRequest
 {
     public MachineInfoRequest MachineInfo { init; get; }
     public Guid               PathId      { init; get; }
     public string             FilePath    { init; get; }
     public string             Username    { init; get; }
     public int                Replication { init; get; }
-    public string             Resource    => $"{Username}/{FilePath}";
-    public string             Location    => $"{MachineInfo.BaseUrl}/{Resource}";
+    
+    public string Resource => $"{Username}/{FilePath}";
+    public string Location => $"{MachineInfo.BaseUrl}/{Resource}";
 }
 
+public readonly struct TwincateFileRequest
+{
+    public MachineInfoRequest MachineInfo { init; get; }
+    public string             FilePath    { init; get; }
+    public string             Username    { init; get; }
+    public string             Resource    => $"{Username}/{FilePath}";
+    public ContentType        ContentType { init; get; }
+
+    public string FileName => Path.GetFileName(FilePath);
+}

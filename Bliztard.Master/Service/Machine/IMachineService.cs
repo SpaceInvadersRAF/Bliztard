@@ -4,7 +4,7 @@ using Bliztard.Contract.Request;
 
 namespace Bliztard.Master.Service.Machine;
 
-public interface IMachineService : ILifecycle
+public interface IMachineService : ILifecycle 
 {
     public bool Register(MachineInfoRequest machineInfo);
     
@@ -12,7 +12,7 @@ public interface IMachineService : ILifecycle
 
     public MachineInfo? Retrieve(Guid machineId);
 
-    public IEnumerable<MachineInfo> AllSlavesWillingToAcceptFile(UploadLocationsRequest request);
+    public IEnumerable<MachineInfo> GetUploadLocations(UploadLocationsRequest request);
 
     public bool Uroshbeat(Guid machineId);
 }

@@ -23,7 +23,7 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
             return BadRequest();
         }
         
-        m_Logger.LogError("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Resource {Resource} | File Registration Succeeded", DateTime.Now, request.MachineInfo.Id, request.Resource);
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Resource {Resource} | File Registration Succeeded", DateTime.Now, request.MachineInfo.Id, request.Resource);
         
         return Ok();
     }

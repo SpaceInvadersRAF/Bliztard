@@ -10,8 +10,8 @@ public readonly struct MachineInfoRequest
 
 public readonly struct UploadLocationsRequest
 {
-    public string             FilePath    { init; get; }
-    public string             Username    { init; get; } 
-    public long               Length      { init; get; }
-    public string             Resource    => $"{Username}/{FilePath}";
+    public string FilePath { init; get; }
+    public string Username { init; get; } 
+    public long   Size     { init; get; }
+    public string Resource => $"{Username}/{FilePath}";
 }

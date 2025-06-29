@@ -4,9 +4,9 @@ public partial struct Configuration
 {
     public struct Log
     {
-        public static readonly string FilePath             = Environment.GetEnvironmentVariable("BLIZTARD_UPLOAD_FILES_DIRECTORY") ?? "logs/Bliztard.log";
-        public static readonly string TimestampFormat      = "yyyy-MM-dd HH:mm:ss.fff";
-        public static readonly bool   Shared               = true;
+        public static readonly string FilePath        = Environment.GetEnvironmentVariable("BLIZTARD_LOG_DIRECTORY") ?? "../logs/Bliztard.log";
+        public static readonly string TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff";
+        public static readonly bool   Shared          = true;
 
         public struct Serilog
         {

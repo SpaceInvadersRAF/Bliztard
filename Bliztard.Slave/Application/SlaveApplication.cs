@@ -1,10 +1,12 @@
 ﻿using Bliztard.Application.Configurations;
 using Bliztard.Application.Extension;
 using Bliztard.Application.Model;
+using Bliztard.Persistence.Log;
 using Bliztard.Slave.Repository.File;
 using Bliztard.Slave.Service;
 using Bliztard.Slave.Service.File;
 using Bliztard.Slave.Service.Machine;
+using Bliztard.Slave.Service.Network;
 using Microsoft.AspNetCore.Http.Features;
 using Serilog;
 using Serilog.Events;
@@ -68,10 +70,12 @@ public static class ServiceCollectionExtensions
 
         services.AddHostedService<ApplicationHostedService>();
 
-        services.AddSingletonWithLifecycle<IFileRepository, InMemoryFileRepository>();
-        services.AddSingletonWithLifecycle<IFileService,    InMemoryFileService>();
+        services.AddSingletonWithLifecycle<IFileRepository, PersistantFileRepository>();
+        services.AddSingletonWithLifecycle<IFileService,    PersistantFileService>();
         services.AddSingletonWithLifecycle<IMachineService, MachineService>();
+        services.AddSingletonWithLifecycle<INetworkService, NetworkService>();
 
+        services.AddSingleton<LogTable>();
         services.AddSingleton<ApplicationServiceLifecycle>();
 
         services.AddHttpClient(Configuration.HttpClient.FileNotifyUpload,

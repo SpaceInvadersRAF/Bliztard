@@ -21,6 +21,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Bliztard.Application\Bliztard.Application.csproj" />
       <ProjectReference Include="..\Bliztard.Contract\Bliztard.Contract.csproj" />
+      <ProjectReference Include="..\Bliztard.Persistence\Bliztard.Persistence.csproj" />
     </ItemGroup>
 
     <ItemGroup>

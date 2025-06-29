@@ -14,7 +14,7 @@ public class MimeType(string contentType, params string[] extensions)
     public static readonly MimeType TextTsv           = new("text/tab-separated-values", "tsv");
 
     public readonly string[]    Extensions  = extensions;
-    public readonly ContentType ContentType = new(contentType);
+    public readonly ContentType ContentType = new(contentType) { Name = contentType};
 
     private static readonly Dictionary<string, MimeType> s_ExtensionDictionary = new();
 

@@ -25,7 +25,7 @@ public partial struct Configuration
             public  const string Download     = $"{Base}/download";
             public  const string NotifyUpload = $"{Base}/notify-upload";
             public  const string Locate       = $"{Base}/locate";
-            public  const string Replicate    = $"{Base}/replicate";
+            public  const string Twincate     = $"{Base}/twincate";
         }
     }
 }

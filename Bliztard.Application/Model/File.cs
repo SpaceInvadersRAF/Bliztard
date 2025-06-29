@@ -1,6 +1,22 @@
-﻿using Bliztard.Application.Extension;
+﻿using System.Net.Mime;
+using Bliztard.Application.Extension;
+using Bliztard.Application.Web;
+
+using PathIO = System.IO.Path;
 
 namespace Bliztard.Application.Model;
+
+public class FileInfo(string username, Guid pathId, string path, long size, MimeType mimeType)
+{
+    public string      Username    { set; get; } = username;
+    public Guid        PathId      { set; get; } = pathId;
+    public string      Path        { set; get; } = path;
+    public long        Size        { set; get; } = size;
+    public ContentType ContentType { set; get; } = mimeType.ContentType;
+    
+    public string Resource => $"{Username}/{Path}";
+    public string Name     => PathIO.GetFileName(Path);
+}
 
 public class SaveFileInfo 
 {
@@ -20,7 +36,7 @@ public class SaveFileInfo
         PathId      = pathId;
         MachineInfo = machineInfo;
         FilePath    = formData.TryGetString("path");
-        FileName    = Path.GetFileName(FilePath);
+        FileName    = PathIO.GetFileName(FilePath);
         Length      = length;
         ContentType = contentType;
         Username    = formData.TryGetString("username");

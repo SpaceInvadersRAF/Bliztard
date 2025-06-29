@@ -1,10 +1,12 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
+
 using Bliztard.Application.Web;
 using Bliztard.Contract.Request;
 using Bliztard.Contract.Response;
 using Bliztard.Test.Configurations;
 using Bliztard.Test.Utilities;
+
 using AppConfiguration = Bliztard.Application.Configurations.Configuration;
 
 namespace Bliztard.Test.Commands;
@@ -26,7 +28,7 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
             tasks[index++] = Task.Run(() => UploadTask(filePath));
 
         Task.WaitAll(tasks);
-        
+
         return DefaultCommand;
     }
 
@@ -42,8 +44,10 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
 
             successful = await UploadToMachine(fileInfo, machineUrl);
         }
-        catch { /*ignored*/ }
-
+        catch
+        {
+            /*ignored*/
+        }
 
         Console.WriteLine(successful ? $"File {fileInfo.Name} has been successfully uploaded." : $"File {fileInfo.Name} upload has failed.");
     }
@@ -55,14 +59,15 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
         var request = new UploadLocationsRequest()
                       {
                           FilePath = fileInfo.Name,
-                          Length   = fileInfo.Length,
+                          Size     = fileInfo.Length,
                           Username = "Urosh<3"
                       };
 
         var response        = await httpClient.PostAsJsonAsync(AppConfiguration.Endpoint.Machine.UploadLocations, request);
         var uploadLocations = await response.Content.ReadFromJsonAsync<UploadLocationsResponse>();
 
-        return uploadLocations.MachineInfos.First().BaseUrl;
+        return uploadLocations.MachineInfos.First()
+                              .BaseUrl;
     }
 
     private async Task<bool> UploadToMachine(FileInfo fileInfo, string machineUrl)
@@ -70,16 +75,17 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
         var httpClient = m_ClientFactory.CreateClient(Configuration.HttpClient.BliztardSlave);
 
         var formData = new MultipartFormDataContent();
-        
-        formData.Add(new StringContent("Urosh<3"), "username");
+
+        formData.Add(new StringContent("Urosh<3"),     "username");
         formData.Add(new StringContent(fileInfo.Name), "path");
 
         var file = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
 
         var fileStream = new StreamContent(file);
 
-        fileStream.Headers.ContentType = new MediaTypeHeaderValue(MimeType.FromExtension(fileInfo.Extension).ContentType.MediaType);
-        
+        fileStream.Headers.ContentType = new MediaTypeHeaderValue(MimeType.FromExtension(fileInfo.Extension)
+                                                                          .ContentType.MediaType);
+
         formData.Add(fileStream, "file", fileInfo.Name);
 
         var response = await httpClient.PostAsync($"{machineUrl}/{AppConfiguration.Endpoint.Files.Upload}", formData);

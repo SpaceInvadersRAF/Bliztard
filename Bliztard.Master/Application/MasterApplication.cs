@@ -6,6 +6,8 @@ using Bliztard.Master.Repository.Machine;
 using Bliztard.Master.Service;
 using Bliztard.Master.Service.File;
 using Bliztard.Master.Service.Machine;
+using Bliztard.Master.Service.MachineFile;
+using Bliztard.Master.Service.Network;
 using Serilog;
 using Serilog.Events;
 
@@ -59,10 +61,12 @@ public static class ServiceCollectionExtensions
         
         services.AddSingleton<ApplicationServiceLifecycle>();
 
-        services.AddSingletonWithLifecycle<IFileRepository,    InMemoryFileRepository>();
-        services.AddSingletonWithLifecycle<IFileService,       InMemoryFileService>();
-        services.AddSingletonWithLifecycle<IMachineRepository, MachineRepository>();
-        services.AddSingletonWithLifecycle<IMachineService,    MachineService>();
+        services.AddSingletonWithLifecycle<IFileRepository,     InMemoryFileRepository>();
+        services.AddSingletonWithLifecycle<IFileService,        InMemoryFileService>();
+        services.AddSingletonWithLifecycle<IMachineRepository,  MachineRepository>();
+        services.AddSingletonWithLifecycle<IMachineService,     MachineService>();
+        services.AddSingletonWithLifecycle<IMachineFileService, MachineFileService>();
+        services.AddSingletonWithLifecycle<INetworkService,     NetworkService>();
         
         return services;
     }

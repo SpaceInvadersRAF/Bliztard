@@ -9,19 +9,18 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bliztard.Master.Controller;
 
 [ApiController]
-public class MachineController(IMachineService machineService, IHttpClientFactory httpClient, ILogger<MachineController> logger, MachineInfo machineInfo) : ControllerBase
+public class MachineController(IMachineService machineService, ILogger<MachineController> logger, MachineInfo machineInfo) : ControllerBase
 {
     private readonly IMachineService            m_MachineService = machineService;
-    private readonly IHttpClientFactory         m_HttpClient     = httpClient;
     private readonly ILogger<MachineController> m_Logger         = logger;
     private readonly MachineInfo                m_MachineInfo    = machineInfo;
     
     [HttpPost(Configuration.Endpoint.Machine.UploadLocations)]
     public IActionResult UploadLocations([FromBody] UploadLocationsRequest request)
     {
-        var machineInfos = m_MachineService.AllSlavesWillingToAcceptFile(request).ToList();
+        var machineInfos = m_MachineService.GetUploadLocations(request).ToList();
         
-        return Ok(new UploadLocationsResponse() { MachineInfos = machineInfos.ToResponse() });
+        return Ok(new UploadLocationsResponse { MachineInfos = machineInfos.ToResponse() });
     }
     
     /// <summary>

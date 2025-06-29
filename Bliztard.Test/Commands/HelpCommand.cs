@@ -28,7 +28,7 @@ public class HelpCommand() : Command(key: Configuration.Command.Help,
                 continue;
 
             stringBuilder.Append(' '.Repeat(commandWidth + 3)).Append("usage: ")
-                         .Append(command.Key)
+                         .Append(command.Key) 
                          .Append(' ')
                          .AppendLine(string.Join(' ', command.Arguments));
         }

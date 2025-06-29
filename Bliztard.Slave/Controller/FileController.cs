@@ -1,10 +1,9 @@
-﻿using System.Net;
-using Bliztard.Application.Configurations;
+﻿using Bliztard.Application.Configurations;
 using Bliztard.Application.Extension;
-using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
-using Bliztard.Contract.Response;
+using Bliztard.Contract.Request;
 using Bliztard.Slave.Service.File;
+using Bliztard.Slave.Service.Network;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
@@ -12,10 +11,10 @@ using Microsoft.Net.Http.Headers;
 namespace Bliztard.Slave.Controller;
 
 [ApiController]
-public class FileController(IHttpClientFactory httpClientFactory, MachineInfo machineInfo, IFileService fileService, ILogger<MachineController> logger) : ControllerBase
+public class FileController(MachineInfo machineInfo, IFileService fileService, INetworkService networkService, ILogger<MachineController> logger) : ControllerBase
 {
-    private readonly IHttpClientFactory         m_HttpClientFactory = httpClientFactory;
     private readonly IFileService               m_FileService       = fileService;
+    private readonly INetworkService            m_NetworkService    = networkService;
     private readonly ILogger<MachineController> m_Logger            = logger;
     private readonly MachineInfo                m_MachineInfo       = machineInfo;
     
@@ -23,13 +22,13 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
     public async Task<IActionResult> Upload()
     {
         var boundary = MediaTypeHeaderValue.Parse(Request.ContentType).Boundary.Value;
-
+        
         if (boundary == null)
             return BadRequest();
         
         var             reader      = new MultipartReader(boundary, HttpContext.Request.Body);
         var             formData    = new Dictionary<string, string>();
-        var             contentType = "";
+        var             contentType = ""; 
         await using var stream      = m_FileService.CreateStream(out var pathId);
         
         m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | PathId: {PathId} | Start Upload", DateTime.Now, m_MachineInfo.Id, pathId);
@@ -59,48 +58,30 @@ public class FileController(IHttpClientFactory httpClientFactory, MachineInfo ma
         
         m_Logger.LogInformation("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Resource: {Resource} | PathId: {PathId} | Save File", DateTime.Now, m_MachineInfo.Id, saveFileInfo.Resource, pathId);
 
-        if (!m_FileService.Save(saveFileInfo)) 
+        if (!await m_FileService.Save(saveFileInfo)) 
             return BadRequest();
         
-        _ = Task.Run(() => NotifyUpload(saveFileInfo));
-        _ = Task.Run(() => Twincate(saveFileInfo));
+        _ = Task.Run(() => m_NetworkService.NotifyUpload(m_MachineInfo, saveFileInfo));
         
         return Created(saveFileInfo.Location, null);
     }
 
-    private async Task<HttpResponseMessage> NotifyUpload(SaveFileInfo saveFileInfo)
+    [HttpPost(Configuration.Endpoint.Files.Twincate)]
+    public async Task<IActionResult> Twincate([FromBody] TwincateFileRequest twincateFile)
     {
-        var httpClient = m_HttpClientFactory.CreateClient(Configuration.HttpClient.FileNotifyUpload);
-        
-        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Resource: {Resource} | Notify Master", DateTime.Now, m_MachineInfo.Id, saveFileInfo.Resource);
-        
-        return await httpClient.PostAsJsonAsync(Configuration.Endpoint.Files.NotifyUpload, saveFileInfo.ToRequest());
-    }
-
-    private async Task<HttpResponseMessage> Twincate(SaveFileInfo saveFileInfo)
-    {
-        if (saveFileInfo.Replication < 2)
-            return new HttpResponseMessage(HttpStatusCode.OK);
-        
-        var httpClient        = m_HttpClientFactory.CreateClient(Configuration.HttpClient.FileTwincateData);
-        var locationsResponse = await httpClient.PostAsJsonAsync(Configuration.Endpoint.Machine.UploadLocations, saveFileInfo.ToUploadLocationsRequest());
-        
-        locationsResponse.EnsureSuccessStatusCode();
-        
-        var machineInfo = (await locationsResponse.Content.ReadFromJsonAsync<UploadLocationsResponse>()).MachineInfos.First(); 
-        
-        var content = new MultipartFormDataContent();
-
-        await using var stream = m_FileService.Read(saveFileInfo.Resource);
+        await using var stream = m_FileService.Read($"{twincateFile.Resource}");
         
         if (stream == null)
-            return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            return NotFound();
 
-        content.AddTwincate(saveFileInfo, stream);
-        
-        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Resource: {Resource} | ReplicationId: {ReplicationId} | Twincate", DateTime.Now, m_MachineInfo.Id, saveFileInfo.Resource, machineInfo.Id);
-        
-        return await httpClient.PostAsync($"{machineInfo.BaseUrl}/{Configuration.Endpoint.Files.Upload}", content);
+        var content = new MultipartFormDataContent();
+
+        content.AddTwincate(twincateFile, stream);
+
+        var locationsResponse = await m_NetworkService.TwincateData(m_MachineInfo, twincateFile, content);
+        locationsResponse.EnsureSuccessStatusCode();
+
+        return Ok();
     }
     
     [HttpGet(Configuration.Endpoint.Files.Download)]
