@@ -13,7 +13,7 @@ public class MachineController(IMachineService machineService, ILogger<MachineCo
 {
     private readonly IMachineService            m_MachineService = machineService;
     private readonly ILogger<MachineController> m_Logger         = logger;
-    private readonly MachineInfo                m_MachineInfo    = machineInfo;
+    private readonly MachineInfo                m_MachineInfo    = machineInfo; // localhost:4030 - [::]:8080
     
     [HttpPost(Configuration.Endpoint.Machine.UploadLocations)]
     public IActionResult UploadLocations([FromBody] UploadLocationsRequest request)
@@ -37,7 +37,7 @@ public class MachineController(IMachineService machineService, ILogger<MachineCo
             return BadRequest();
         }
         
-        m_Logger.LogInformation("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Machine Registration Succeeded", DateTime.Now, machineInfoRequest.Id);
+        m_Logger.LogInformation("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | MachineUrl: {MachineBaseUrl} | Machine Registration Succeeded", DateTime.Now, machineInfoRequest.Id, machineInfoRequest.BaseUrl);
 
         return Ok(m_MachineInfo);
     }

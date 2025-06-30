@@ -1,4 +1,5 @@
-﻿using Bliztard.Application.Core;
+﻿using Bliztard.Application.Configurations;
+using Bliztard.Application.Core;
 using Bliztard.Application.Model;
 using Bliztard.Persistence.Log;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -22,7 +23,7 @@ public class ApplicationServiceLifecycle(ILogger<ApplicationServiceLifecycle> lo
     {
         m_Logger.LogInformation("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Application Started", DateTime.Now, m_MachineInfo.Id);
 
-        m_MachineInfo.Resource.BaseUrl = Urls.First();
+        m_MachineInfo.Resource.BaseUrl = Configuration.Core.MachinePublicUrl;
 
         var uri = new Uri(Urls.First());
         

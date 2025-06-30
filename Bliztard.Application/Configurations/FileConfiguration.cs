@@ -1,11 +1,13 @@
-﻿namespace Bliztard.Application.Configurations;
+﻿using Bliztard.Application.Utilities;
+
+namespace Bliztard.Application.Configurations;
 
 public partial struct Configuration
 {
     public partial struct Core
     {
         public static readonly int    ReplicationFactor = 3;
-        public static readonly string MasterBaseUrl     = Environment.GetEnvironmentVariable("BLIZTARD_MASTER_BASE_URL") ?? "http://localhost:3031";
+        public static readonly string MasterBaseUrl     = EnvironmentUtilities.GetStringVariable("BLIZTARD_MASTER_BASE_URL", "http://localhost:3031");
     }
     
     public partial struct HttpClient

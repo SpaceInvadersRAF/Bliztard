@@ -1,8 +1,13 @@
-﻿namespace Bliztard.Application.Configurations;
+﻿using Bliztard.Application.Utilities;
+
+namespace Bliztard.Application.Configurations;
 
 public partial struct Configuration
 {
-    public partial struct Core { }
+    public partial struct Core
+    {
+        public static readonly string MachinePublicUrl = EnvironmentUtilities.GetStringVariable("BLIZTARD_MACHINE_PUBLIC_URL") ;
+    }
     
     public partial struct HttpClient
     {
