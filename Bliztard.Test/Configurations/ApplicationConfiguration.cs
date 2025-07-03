@@ -4,7 +4,7 @@ public partial struct Configuration
 {
     public struct Core
     {
-        public static readonly string? UploadFilesDirectory = Environment.GetEnvironmentVariable("BLIZTARD_UPLOAD_FILES_DIRECTORY");
+        public static readonly string? UploadFilesDirectory = Environment.GetEnvironmentVariable("BLIZTARD_UPLOAD_FILES_DIRECTORY") ?? "D:\\Data\\Bliztard\\Files";
     }
 
     public struct HttpClient

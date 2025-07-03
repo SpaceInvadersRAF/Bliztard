@@ -90,6 +90,7 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
 
         var response = await httpClient.PostAsync($"{machineUrl}/{AppConfiguration.Endpoint.Files.Upload}", formData);
 
+        Console.WriteLine($"---------------- {machineUrl}/{AppConfiguration.Endpoint.Files.Upload} --------------------");
         return response.IsSuccessStatusCode;
     }
 }

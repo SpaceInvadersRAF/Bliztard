@@ -43,7 +43,7 @@ public class MachineController(IMachineService machineService, ILogger<MachineCo
     }
     
     /// <summary>
-    /// heartbeat na 4 sekundi salje slave, a na 8 sekundi proverava master
+    /// heartbeat na 4 sekunde salje slave, a na 8 sekundi proverava master
     /// </summary>
     /// <param name="machineId"></param>
     /// <returns></returns>
@@ -52,12 +52,12 @@ public class MachineController(IMachineService machineService, ILogger<MachineCo
     {
         if (!m_MachineService.Uroshbeat(machineId))
         {
-            m_Logger.LogWarning("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Heartbeat Rejected", DateTime.Now, machineInfo.Id);
+            m_Logger.LogWarning("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Heartbeat Rejected", DateTime.Now, machineId);
             
             return BadRequest();
         }
 
-        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Heartbeat Accepted", DateTime.Now, machineInfo.Id);
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Heartbeat Accepted", DateTime.Now, machineId);
 
         return Ok();
     }

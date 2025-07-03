@@ -1,20 +1,24 @@
-﻿namespace Bliztard.Slave.Service;
+﻿using Bliztard.Slave.BackgroundService;
 
-public class ApplicationHostedService(IHostApplicationLifetime applicationLifetime, ApplicationServiceLifecycle applicationServiceLifecycle) : IHostedService
+namespace Bliztard.Slave.Service;
+
+public class ApplicationHostedService(IHostApplicationLifetime applicationLifetime, ApplicationServiceLifecycle applicationServiceLifecycle, WiwiwiBackgroundService wiwiwiBackgroundService)
+: IHostedService
 {
     private readonly IHostApplicationLifetime    m_ApplicationLifetime         = applicationLifetime;
     private readonly ApplicationServiceLifecycle m_ApplicationServiceLifecycle = applicationServiceLifecycle;
+    private readonly WiwiwiBackgroundService     m_WiwiwiBackgroundService     = wiwiwiBackgroundService;
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
+        await m_WiwiwiBackgroundService.StartAsync(cancellationToken);
+
         m_ApplicationLifetime.ApplicationStarted.Register(m_ApplicationServiceLifecycle.OnApplicationStarted);
         m_ApplicationLifetime.ApplicationStopped.Register(m_ApplicationServiceLifecycle.OnApplicationStopped);
-        
-        return Task.CompletedTask;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
-        return Task.CompletedTask;
+        await m_WiwiwiBackgroundService.StopAsync(cancellationToken);
     }
 }

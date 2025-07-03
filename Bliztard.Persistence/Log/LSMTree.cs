@@ -1,10 +1,13 @@
 ﻿using System.Collections.Concurrent;
+
+using Bliztard.Persistence.Configurations;
 using Bliztard.Persistence.Marshaling;
 using Bliztard.Persistence.Table;
 using Bliztard.Persistence.Table.Types;
 
-namespace Bliztard.Persistence.Log;
+using Microsoft.Extensions.Logging;
 
+namespace Bliztard.Persistence.Log;
 
 public readonly struct LogAction : IMarshal
 {
@@ -21,10 +24,7 @@ public readonly struct LogAction : IMarshal
         Value.Serialize(writer);
     }
 
-    public void Deserialize(BinaryReader reader)
-    {
-        
-    }
+    public void Deserialize(BinaryReader reader) { }
 
     public long Size()
     {
@@ -47,22 +47,26 @@ internal abstract class AbstractLogAction : IMarshal
                };
     }
 
+    public abstract Guid Id();
+    
     public abstract void Populate(WiwiwiTable table);
 
     public abstract void Serialize(BinaryWriter writer);
-    
+
     public abstract void Deserialize(BinaryReader reader);
-    
+
     public abstract long Size();
 }
 
 file class CreateLogAction(Guid guid = default, string resource = "", string content = "") : AbstractLogAction
 {
     public static readonly LogAction Action = LogAction.Create;
-    
+
     internal          PersistentGuid          Guid     = guid;
     internal readonly PersistentAsciiString   Resource = resource;
     internal readonly PersistentUnicodeString Content  = content;
+
+    public override Guid Id() => Guid;
 
     public override void Populate(WiwiwiTable table)
     {
@@ -83,13 +87,15 @@ file class CreateLogAction(Guid guid = default, string resource = "", string con
         Guid.Deserialize(reader);
         Resource.Deserialize(reader);
         Content.Deserialize(reader);
+
+        Console.WriteLine($"Create | Guid: {Guid} | Resource: {Resource}");
     }
 
     public override long Size()
     {
         return Action.Size() + Resource.Size() + Content.Size();
     }
-    
+
     public override string ToString()
     {
         return $"{nameof(LogAction.Create)} | Guid: `{Guid}` | Resource: `{Resource}` | Content: `{Content}`";
@@ -98,6 +104,8 @@ file class CreateLogAction(Guid guid = default, string resource = "", string con
 
 file class RenameLogAction() : AbstractLogAction //todo: one day in the future
 {
+    public override Guid Id() => Guid.Empty;
+  
     public override void Populate(WiwiwiTable table)
     {
         throw new NotImplementedException();
@@ -122,11 +130,13 @@ file class RenameLogAction() : AbstractLogAction //todo: one day in the future
 file class UpdateLogAction(Guid guid = default, string resource = "", string content = "") : AbstractLogAction
 {
     public static readonly LogAction Action = LogAction.Update;
-    
+
     internal          PersistentGuid          Guid     = guid;
     internal readonly PersistentAsciiString   Resource = resource;
     internal readonly PersistentUnicodeString Content  = content;
 
+    public override Guid Id() => Guid;
+    
     public override void Populate(WiwiwiTable table)
     {
         table.Update(Guid, Content);
@@ -146,26 +156,30 @@ file class UpdateLogAction(Guid guid = default, string resource = "", string con
         Guid.Deserialize(reader);
         Resource.Deserialize(reader);
         Content.Deserialize(reader);
+  
+        Console.WriteLine($"Create | Guid: {Guid} | Resource: {Resource}");
     }
 
     public override long Size()
     {
         return Action.Size() + Resource.Size() + Content.Size();
     }
-    
+
     public override string ToString()
     {
         return $"{nameof(LogAction.Update)} | Guid: `{Guid}` | Resource: `{Resource}` | Content: `{Content}`";
     }
-} 
+}
 
 file class DeleteLogAction(Guid guid = default, string resource = "") : AbstractLogAction
 {
     public static readonly LogAction Action = LogAction.Delete;
-    
+
     internal          PersistentGuid        Guid     = guid;
     internal readonly PersistentAsciiString Resource = resource;
 
+    public override Guid Id() => Guid;
+    
     public override void Populate(WiwiwiTable table)
     {
         table.Remove(Guid, "primary_index", Resource);
@@ -176,6 +190,8 @@ file class DeleteLogAction(Guid guid = default, string resource = "") : Abstract
         Action.Serialize(writer);
         Guid.Serialize(writer);
         Resource.Serialize(writer);
+   
+        Console.WriteLine($"Create | Guid: {Guid} | Resource: {Resource}");
     }
 
     public override void Deserialize(BinaryReader reader)
@@ -184,7 +200,7 @@ file class DeleteLogAction(Guid guid = default, string resource = "") : Abstract
         Guid.Deserialize(reader);
         Resource.Deserialize(reader);
     }
-    
+
     public override long Size()
     {
         return Action.Size() + Resource.Size();
@@ -202,55 +218,46 @@ internal class LogEntry(AbstractLogAction logAction)
     public readonly TaskCompletionSource<bool> Source    = new();
 }
 
-public class LogTable
+public class LogTable(ILogger logger)
 {
     private readonly ConcurrentQueue<LogEntry> m_LogQueue  = new();
     private readonly ManualResetEventSlim      m_LogSignal = new(false);
-    private readonly Thread                    m_Thread;
+    public readonly  ILogger                   m_Logger    = logger;
     
-    private bool   m_IsActive = true;
-    private string m_Name     = "file";
-    
-    public LogTable()
-    {
-        m_Thread = new Thread(RunThread);
-    }
 
-    public static WiwiwiTable RaspyTable(string fileName) //NOTE recovery - reproduce
-    {
-        using var fileStream = new FileStream($"{fileName}.logtable", FileMode.Open, FileAccess.Read, FileShare.Read);
-        using var reader     = new BinaryReader(fileStream);
+    private bool m_IsActive = true;
 
+    public static WiwiwiTable RaspyTable() //NOTE recovery - reproduce
+    {
         var table = new WiwiwiTable();
+
+        if (!File.Exists(Configuration.File.LogTablePath))
+            return table;
+        
+        using var fileStream = new FileStream(Configuration.File.LogTablePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using var reader     = new BinaryReader(fileStream);
         
         while (reader.BaseStream.Position < reader.BaseStream.Length)
         {
             var logAction = AbstractLogAction.FindLogAction(reader);
-            
+
             logAction.Deserialize(reader);
             logAction.Populate(table);
         }
 
         return table;
     }
-    
-    public void StartBackgroundThread()
-    {
-        m_Thread.Start(); // let's boot this thing up.
-    }
 
-    public void SetName(string name) => m_Name = name; 
-    
-    private void RunThread()
+    public void Start(CancellationToken cancellationToken)
     {
-        using var fileStream = new FileStream($"{m_Name}.logtable", FileMode.Append, FileAccess.Write, FileShare.Read);
+        using var fileStream = new FileStream(Configuration.File.LogTablePath, FileMode.Append, FileAccess.Write, FileShare.Read);
         using var writer     = new BinaryWriter(fileStream);
-        
+
         while (m_IsActive || !m_LogQueue.IsEmpty)
         {
             if (m_LogQueue.IsEmpty)
             {
-                m_LogSignal.Wait();
+                m_LogSignal.Wait(cancellationToken);
                 m_LogSignal.Reset();
             }
 
@@ -259,27 +266,34 @@ public class LogTable
                 try
                 {
                     entry.LogAction.Serialize(writer);
-                    
+
                     writer.Flush();
-                
+                    
+                    m_Logger.LogDebug("Log Table | Guid: {Guid} | Succeeded", entry.LogAction.Id());
+                    
                     entry.Source.SetResult(true);
-                } 
+                }
                 catch
                 {
+                    m_Logger.LogDebug("Log Table | Guid: {Guid} | Failed", entry.LogAction.Id());
+                    
                     entry.Source.SetResult(false);
-                    // or entry.Source.SetException(exception);
                 }
             }
-        } 
+        }
     }
 
     public Task<bool> LogCreateAction(Guid guid, string resource, string content)
     {
+        m_Logger.LogDebug("Log Table | Create | Guid: {Guid} | Resource: {Resource}", guid, resource);
+        
         return AddEntry(new LogEntry(new CreateLogAction(guid, resource, content)));
     }
-    
+
     public Task<bool> LogUpdateAction(Guid guid, string resource, string content)
     {
+        m_Logger.LogDebug("Log Table | Update | Guid: {Guid} | Resource: {Resource}", guid, resource);
+        
         return AddEntry(new LogEntry(new UpdateLogAction(guid, resource, content)));
     }
 
@@ -288,17 +302,19 @@ public class LogTable
     {
         return AddEntry(new LogEntry(new RenameLogAction()));
     }
-        
+
     public Task<bool> LogDeleteAction(Guid guid, string resource)
     {
+        m_Logger.LogDebug("Log Table | Delete | Guid: {Guid} | Resource: {Resource}", guid, resource);
+        
         return AddEntry(new LogEntry(new DeleteLogAction(guid, resource)));
     }
-    
+
     private Task<bool> AddEntry(LogEntry entry)
     {
         m_LogQueue.Enqueue(entry);
         m_LogSignal.Set();
-        
+
         return entry.Source.Task;
     }
 
@@ -306,7 +322,5 @@ public class LogTable
     {
         m_IsActive = false;
         m_LogSignal.Set();
-        m_Thread.Join();
     }
 }
-

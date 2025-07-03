@@ -2,6 +2,7 @@
 using Bliztard.Application.Extension;
 using Bliztard.Application.Model;
 using Bliztard.Persistence.Log;
+using Bliztard.Slave.BackgroundService;
 using Bliztard.Slave.Repository.File;
 using Bliztard.Slave.Service;
 using Bliztard.Slave.Service.File;
@@ -77,8 +78,8 @@ public static class ServiceCollectionExtensions
         services.AddSingletonWithLifecycle<IMachineService, MachineService>();
         services.AddSingletonWithLifecycle<INetworkService, NetworkService>();
 
-        services.AddSingleton<LogTable>();
         services.AddSingleton<ApplicationServiceLifecycle>();
+        services.AddSingleton<WiwiwiBackgroundService>();
 
         services.AddHttpClient(Configuration.HttpClient.FileNotifyUpload,
                                client =>

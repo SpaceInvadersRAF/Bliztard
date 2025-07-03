@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+
 using Bliztard.Persistence.Table.Types;
 
 namespace Bliztard.Persistence.Table;
@@ -32,7 +33,7 @@ public class WiwiwiTable
     {
         if (!IndexTable.TryFindEntry(indexName, resource, out var resourceGuid))
             return null;
-
+        
         if (!RecordTable.TryFindEntry(resourceGuid, out var data))
             return null;
 

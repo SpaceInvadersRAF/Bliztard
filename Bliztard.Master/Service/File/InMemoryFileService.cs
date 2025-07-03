@@ -27,7 +27,7 @@ public class InMemoryFileService(IFileRepository fileRepository, IMachineFileSer
         m_NetworkService.TwincateFileToMachine(notifySave.ToFileInfo(), notifySave.MachineInfo.ToModel(), machineInfos.First()); //todo make it async
         
         return true;
-    } 
+    }
 
     public MachineInfo? LocateFile(string resource)
     {
