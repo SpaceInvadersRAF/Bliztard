@@ -1,0 +1,128 @@
+﻿services:
+  master:
+    image: bliztard_master
+    build:
+      context: ..
+      dockerfile: Scripts/Master/Dockerfile
+    ports:
+      - "${MASTER_EXPOSE_PORT}:8080"
+    env_file:
+      - Environment/master.env
+    environment:
+      - BLIZTARD_MACHINE_PUBLIC_URL=http://localhost:${MASTER_EXPOSE_PORT}
+    volumes:
+      - bliztard_master_data:/bliztard
+  slave00:
+    image: bliztard_slave
+    build:
+      context: ..
+      dockerfile: Scripts/Slave/Dockerfile
+    ports:
+      - "${SLAVE_00_EXPOSE_PORT}:8080"
+    env_file:
+      - Environment/slave.env
+    environment:
+      - BLIZTARD_MACHINE_PUBLIC_URL=http://localhost:${SLAVE_00_EXPOSE_PORT}
+    volumes:
+      - bliztard_slave_00_data:/bliztard
+  slave01:
+    image: bliztard_slave
+    build:
+      context: ..
+      dockerfile: Scripts/Slave/Dockerfile
+    ports:
+      - "${SLAVE_01_EXPOSE_PORT}:8080"
+    env_file:
+      - Environment/slave.env
+    environment:
+      - BLIZTARD_MACHINE_PUBLIC_URL=http://localhost:${SLAVE_01_EXPOSE_PORT}
+    volumes:
+      - bliztard_slave_01_data:/bliztard
+  slave02:
+    image: bliztard_slave
+    build:
+      context: ..
+      dockerfile: Scripts/Slave/Dockerfile
+    ports:
+      - "${SLAVE_02_EXPOSE_PORT}:8080"
+    env_file:
+      - Environment/slave.env
+    environment:
+      - BLIZTARD_MACHINE_PUBLIC_URL=http://localhost:${SLAVE_02_EXPOSE_PORT}
+    volumes:
+      - bliztard_slave_02_data:/bliztard
+  slave03:
+    image: bliztard_slave
+    build:
+      context: ..
+      dockerfile: Scripts/Slave/Dockerfile
+    ports:
+      - "${SLAVE_03_EXPOSE_PORT}:8080"
+    env_file:
+      - Environment/slave.env
+    volumes:
+      - bliztard_slave_03_data:/bliztard
+  slave04:
+    image: bliztard_slave
+    build:
+      context: ..
+      dockerfile: Scripts/Slave/Dockerfile
+    ports:
+      - "${SLAVE_04_EXPOSE_PORT}:8080"
+    env_file:
+      - Environment/slave.env
+    volumes:
+      - bliztard_slave_04_data:/bliztard
+  slave05:
+    image: bliztard_slave
+    build:
+      context: ..
+      dockerfile: Scripts/Slave/Dockerfile
+    ports:
+      - "${SLAVE_05_EXPOSE_PORT}:8080"
+    env_file:
+      - Environment/slave.env
+    volumes:
+      - bliztard_slave_05_data:/bliztard
+  slave06:
+    image: bliztard_slave
+    build:
+      context: ..
+      dockerfile: Scripts/Slave/Dockerfile
+    ports:
+      - "${SLAVE_06_EXPOSE_PORT}:8080"
+    env_file:
+      - Environment/slave.env
+    volumes:
+      - bliztard_slave_06_data:/bliztard
+  slave07:
+    image: bliztard_slave
+    build:
+      context: ..
+      dockerfile: Scripts/Slave/Dockerfile
+    ports:
+      - "${SLAVE_07_EXPOSE_PORT}:8080"
+    env_file:
+      - Environment/slave.env
+    volumes:
+      - bliztard_slave_07_data:/bliztard
+
+volumes:
+  bliztard_master_data:
+    name: bliztard_master
+  bliztard_slave_00_data:
+    name: bliztard_slave_00
+  bliztard_slave_01_data:
+    name: bliztard_slave_01
+  bliztard_slave_02_data:
+    name: bliztard_slave_02
+  bliztard_slave_03_data:
+    name: bliztard_slave_03
+  bliztard_slave_04_data:
+    name: bliztard_slave_04
+  bliztard_slave_05_data:
+    name: bliztard_slave_05
+  bliztard_slave_06_data:
+    name: bliztard_slave_06
+  bliztard_slave_07_data:
+    name: bliztard_slave_07
