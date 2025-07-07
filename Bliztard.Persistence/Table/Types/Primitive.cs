@@ -243,9 +243,9 @@ public class PersistentAsciiString(string value = "") : IMarshal, IComparable<Pe
     public override string ToString() => m_Value;
 }
 
-public class PersistentUnicodeString(string value = "") : IMarshal, IComparable<PersistentUnicodeString>
+public class PersistentUtf8String(string value = "") : IMarshal, IComparable<PersistentUtf8String>
 {
-    private readonly Encoding m_Encoding = Encoding.Unicode;
+    private readonly Encoding m_Encoding = Encoding.UTF8;
     
     private string m_Value = value;
 
@@ -266,13 +266,13 @@ public class PersistentUnicodeString(string value = "") : IMarshal, IComparable<
     
     public long Size() => sizeof(int) + StringSize();
 
-    public static implicit operator PersistentUnicodeString(string value) => new(value);
+    public static implicit operator PersistentUtf8String(string value) => new(value);
  
-    public static implicit operator string(PersistentUnicodeString persistentInt) => persistentInt.m_Value;
+    public static implicit operator string(PersistentUtf8String persistentInt) => persistentInt.m_Value;
 
     public override string ToString() => m_Value;
 
-    public int CompareTo(PersistentUnicodeString? other) => string.Compare(m_Value, other!.m_Value, StringComparison.Ordinal);
+    public int CompareTo(PersistentUtf8String? other) => string.Compare(m_Value, other!.m_Value, StringComparison.Ordinal);
 }
 
 public class PersistentConstAsciiString(string value) : IMarshal, IComparable<PersistentConstAsciiString>

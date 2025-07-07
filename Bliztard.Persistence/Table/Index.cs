@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+
 using Bliztard.Application.Extension;
 using Bliztard.Persistence.Extension;
 using Bliztard.Persistence.Marshaling;
 using Bliztard.Persistence.Table.Types;
+
 using Towel.DataStructures;
 
 namespace Bliztard.Persistence.Table;
@@ -58,7 +60,8 @@ public class IndexTable : IMarshal
 
     public PersistentGuid FindEntry(string indexName, string resource)
     {
-        return DataSegment.GetEntry(indexName, resource)?.IndexValue ?? default;
+        return DataSegment.GetEntry(indexName, resource)
+                          ?.IndexValue ?? default;
     }
 
     public bool TryFindEntry(string indexName, string resource, out PersistentGuid indexGuid)
@@ -186,7 +189,8 @@ public class IndexKeySegment(IndexTable indexTable) : IMarshal
     internal IndexKeySegmentEntry? GetPreviousEntry(string indexName)
     {
         //NOTE: dont lock, only one is allowed
-        if (m_Entries.Count < 2 || m_Entries.First().IndexName == indexName)
+        if (m_Entries.Count < 2 || m_Entries.First()
+                                            .IndexName == indexName)
             return null;
 
         for (int index = 1; index < m_Entries.Count; ++index)
@@ -199,7 +203,8 @@ public class IndexKeySegment(IndexTable indexTable) : IMarshal
     internal IndexKeySegmentEntry? GetNextEntry(string indexName)
     {
         //NOTE: dont lock, only one is allowed
-        if (m_Entries.Count < 2 || m_Entries.Last().IndexName == indexName)
+        if (m_Entries.Count < 2 || m_Entries.Last()
+                                            .IndexName == indexName)
             return null;
 
         for (int index = 0; index < m_Entries.Count - 1; ++index)
@@ -242,8 +247,7 @@ public class IndexKeySegmentEntry(IndexTable indexTable, string indexName = "") 
 
         IndexOffset = previousEntry == null
                       ? 0
-                      : previousEntry.IndexOffset + m_IndexTable.DataSegment
-                                                                .GetEntries(previousEntry.IndexName)
+                      : previousEntry.IndexOffset + m_IndexTable.DataSegment.GetEntries(previousEntry.IndexName)
                                                                 .Aggregate(0L, (current, entry) => current + entry.Size());
     }
 
@@ -263,8 +267,7 @@ public class IndexDataSegment(IndexTable indexTable) : IMarshal
     {
         //NOTE: dont lock, only one is allowed
 
-        m_IndexTable.KeySegment
-                    .GetEntries()
+        m_IndexTable.KeySegment.GetEntries()
                     .Select(keyEntry => m_Entries.GetValueOrDefault(keyEntry.IndexName, RedBlackTreeLinked.New<IndexDataSegmentEntry>()))
                     .SelectMany(dataEntries => dataEntries)
                     .ToList()
@@ -273,7 +276,8 @@ public class IndexDataSegment(IndexTable indexTable) : IMarshal
 
     public void Deserialize(BinaryReader reader)
     {
-        m_IndexTable.KeySegment.GetEntries().ForEach(keyEntry => Deserialize(reader, keyEntry.IndexName));
+        m_IndexTable.KeySegment.GetEntries()
+                    .ForEach(keyEntry => Deserialize(reader, keyEntry.IndexName));
     }
 
     public void Deserialize(BinaryReader reader, string indexKey)
@@ -282,13 +286,11 @@ public class IndexDataSegment(IndexTable indexTable) : IMarshal
 
         var keyEntry     = m_IndexTable.KeySegment.GetEntry(indexKey);
         var nextKeyEntry = m_IndexTable.KeySegment.GetNextEntry(indexKey);
-        
+
         if (keyEntry is null)
             return;
 
-        long nextOffset = nextKeyEntry is null
-                          ? reader.BaseStream.Length
-                          : m_IndexTable.HeaderSegment.DataSegmentOffset + nextKeyEntry.IndexOffset;
+        long nextOffset = nextKeyEntry is null ? reader.BaseStream.Length : m_IndexTable.HeaderSegment.DataSegmentOffset + nextKeyEntry.IndexOffset;
 
         reader.BaseStream.Position = m_IndexTable.HeaderSegment.DataSegmentOffset + keyEntry.IndexOffset;
 
@@ -323,9 +325,7 @@ public class IndexDataSegment(IndexTable indexTable) : IMarshal
         return m_Lock.ReadBlock(() => m_Entries.GetValueOrDefault(indexName, RedBlackTreeLinked.New<IndexDataSegmentEntry>()));
     }
 
-    public void Calculate()
-    {
-    }
+    public void Calculate() { }
 
     public long Size()
     {
@@ -337,22 +337,23 @@ public class IndexDataSegment(IndexTable indexTable) : IMarshal
     {
         if (!m_Entries.ContainsKey(indexName))
             return false;
-        
+
         var entry = GetEntry(indexName, oldIndexKey);
-        
+
         return entry is not null && RemoveEntry(indexName, oldIndexKey) && AddEntry(indexName, newIndexKey, entry.IndexValue);
     }
-    
+
     public bool RemoveEntry(string indexName, string resource)
     {
         // return m_Entries.TryGetValue(indexName, out var tree) && tree.TryRemove(new IndexDataSegmentEntry(m_IndexTable, resource)).Success;
         return true;
     }
-    
+
     internal IndexDataSegmentEntry? GetEntry(string indexName, string indexKey)
     {
         return m_Entries.TryGetValue(indexName, out var tree)
-               ? tree.TryGet(other => new IndexDataSegmentEntry(m_IndexTable, indexKey).Medic(other)).Value
+               ? tree.TryGet(other => new IndexDataSegmentEntry(m_IndexTable, indexKey).Medic(other))
+                     .Value
                : null;
     }
 }
@@ -361,8 +362,8 @@ public class IndexDataSegmentEntry(IndexTable indexTable, string indexKey = "", 
 {
     private readonly IndexTable m_IndexTable = indexTable;
 
-    internal PersistentUnicodeString IndexKey   { set; get; } = indexKey;
-    internal PersistentGuid          IndexValue { set; get; } = indexValue;
+    internal PersistentUtf8String IndexKey   { set; get; } = indexKey;
+    internal PersistentGuid       IndexValue { set; get; } = indexValue;
 
     public void Serialize(BinaryWriter writer)
     {
@@ -376,10 +377,7 @@ public class IndexDataSegmentEntry(IndexTable indexTable, string indexKey = "", 
         IndexValue.Deserialize(reader);
     }
 
-    public void Calculate()
-    {
-        
-    }
+    public void Calculate() { }
 
     public long Size()
     {

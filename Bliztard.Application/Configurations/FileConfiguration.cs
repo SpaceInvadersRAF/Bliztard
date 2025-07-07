@@ -25,7 +25,9 @@ public partial struct Configuration
             private const string Base         = "files";
             public  const string Upload       = $"{Base}/upload";
             public  const string Download     = $"{Base}/download";
+            public  const string Delete       = $"{Base}/delete";
             public  const string NotifyUpload = $"{Base}/notify-upload";
+            public  const string NotifyDelete = $"{Base}/notify-delete";
             public  const string Locate       = $"{Base}/locate";
             public  const string Twincate     = $"{Base}/twincate";
         }

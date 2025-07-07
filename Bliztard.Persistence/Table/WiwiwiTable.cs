@@ -29,18 +29,32 @@ public class WiwiwiTable
         return RecordTable.RemoveEntry(guid) && IndexTable.RemoveEntry(indexName, resource);
     }
 
-    public PersistentUnicodeString? Find(string indexName, string resource)
+    // public List<PersistentUtf8String> FindAllResources()
+    // {
+    //     var primaryIndexEntities = IndexTable.DataSegment.GetEntries("primary_index");
+    //
+    //     return primaryIndexEntities.Select(entry => entry.IndexKey)
+    //                                .ToList();
+    // }
+
+    public List<(PersistentGuid Id, PersistentUtf8String Data)> FindAllResources()
+    {
+        return IndexTable.DataSegment.GetEntries("primary_index").Select(entry => (entry.IndexValue, entry.IndexKey))
+                         .ToList();
+    }
+
+    public PersistentUtf8String? Find(string indexName, string resource)
     {
         if (!IndexTable.TryFindEntry(indexName, resource, out var resourceGuid))
             return null;
-        
+
         if (!RecordTable.TryFindEntry(resourceGuid, out var data))
             return null;
 
         return data;
     }
 
-    public bool TryFind(string indexName, string resource, [MaybeNullWhen(false)] out PersistentUnicodeString data)
+    public bool TryFind(string indexName, string resource, [MaybeNullWhen(false)] out PersistentUtf8String data)
     {
         data = Find(indexName, resource);
 

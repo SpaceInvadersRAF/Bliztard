@@ -64,7 +64,7 @@ file class CreateLogAction(Guid guid = default, string resource = "", string con
 
     internal          PersistentGuid          Guid     = guid;
     internal readonly PersistentAsciiString   Resource = resource;
-    internal readonly PersistentUnicodeString Content  = content;
+    internal readonly PersistentUtf8String Content  = content;
 
     public override Guid Id() => Guid;
 
@@ -133,7 +133,7 @@ file class UpdateLogAction(Guid guid = default, string resource = "", string con
 
     internal          PersistentGuid          Guid     = guid;
     internal readonly PersistentAsciiString   Resource = resource;
-    internal readonly PersistentUnicodeString Content  = content;
+    internal readonly PersistentUtf8String Content  = content;
 
     public override Guid Id() => Guid;
     

@@ -42,4 +42,16 @@ public class SaveFileInfo
         Username    = formData.TryGetString("username");
         Replication = int.TryParse(formData.TryGetString("replications"), out var replicationFactor) ? replicationFactor : Configurations.Configuration.Core.ReplicationFactor;
     }
+    
+    public SaveFileInfo(MachineInfo machineInfo, Guid pathId, string resource, string contentType, long length, int replication)
+    {
+        PathId      = pathId;
+        MachineInfo = machineInfo;
+        FilePath    = resource.Split("/")[1];       //TODO
+        FileName    = PathIO.GetFileName(FilePath); //TODO
+        Length      = length;
+        ContentType = contentType;
+        Username    = resource.Split("/")[0]; //TODO
+        Replication = replication;
+    }
 }

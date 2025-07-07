@@ -60,7 +60,7 @@ public class RecordTable : IMarshal
     {
         return entry != null && DataSegment.UpdateEntry(recordGuid, content);;
     }
-
+    
     public bool AddEntry(Guid recordGuid, string content)
     {
         if (!AddEntry(recordGuid, content, false))
@@ -93,7 +93,7 @@ public class RecordTable : IMarshal
         return false;
     }
 
-    public PersistentUnicodeString? FindEntry(PersistentGuid resourceGuid)
+    public PersistentUtf8String? FindEntry(PersistentGuid resourceGuid)
     {
         var keyEntry = KeySegment.GetEntry(resourceGuid);
 
@@ -103,7 +103,7 @@ public class RecordTable : IMarshal
         return DataSegment.GetEntry(resourceGuid)?.RecordData;
     }
 
-    public bool TryFindEntry(PersistentGuid resourceGuid, [MaybeNullWhen(false)] out PersistentUnicodeString data)
+    public bool TryFindEntry(PersistentGuid resourceGuid, [MaybeNullWhen(false)] out PersistentUtf8String data)
     {
         data = FindEntry(resourceGuid);
 
@@ -370,7 +370,7 @@ public class RecordDataSegmentEntry(RecordTable recordTable) : IMarshal
 {
     private readonly RecordTable m_RecordTable  = recordTable;  
 
-    internal PersistentUnicodeString RecordData { set; get; }
+    internal PersistentUtf8String RecordData { set; get; }
 
     public void Serialize(BinaryWriter writer)
     {
