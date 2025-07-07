@@ -19,4 +19,6 @@ public interface IFileRepository : ILifecycle
     public Task<bool> Delete(string resource, Guid pathId);
 
     public Stream? Load(string resource);
+
+    void Stats();
 }

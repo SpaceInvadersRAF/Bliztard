@@ -11,4 +11,6 @@ public interface INetworkService : ILifecycle
     public Task<HttpResponseMessage> TwincateFileToMachine(FileInfo fileInfo, MachineInfo resourceMachine, MachineInfo uploadMachine);
 
     public Task<HttpResponseMessage> NotifyDelete(MachineInfo machineInfo, NotifyDeleteRequest request);
+    
+    public Task<HttpResponseMessage> Stats(MachineInfo machineInfo);
 }

@@ -257,8 +257,8 @@ public class RecordKeySegmentEntry(RecordTable recordTable) : IMarshal
 {
     private readonly RecordTable m_RecordTable = recordTable;
     
-    internal PersistentGuid  RecordGuid   { set; get; }
-    internal PersistentInt64 RecordOffset { set; get; }
+    public PersistentGuid  RecordGuid   { internal set; get; }
+    public PersistentInt64 RecordOffset { internal set; get; }
     
     public void Serialize(BinaryWriter writer)
     {

@@ -109,4 +109,12 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
 
         return Ok();
     }
+    
+    [HttpPost(Configuration.Endpoint.Files.Stats)]
+    public IActionResult Stats()
+    {
+        m_FileService.Stats();
+
+        return Ok();
+    }
 }

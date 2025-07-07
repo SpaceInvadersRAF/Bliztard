@@ -43,7 +43,7 @@ internal abstract class AbstractLogAction : IMarshal
                    _ when logActionByte == LogAction.Create.Value => new CreateLogAction(),
                    _ when logActionByte == LogAction.Update.Value => new UpdateLogAction(),
                    _ when logActionByte == LogAction.Delete.Value => new DeleteLogAction(),
-                   _                                              => throw new ArgumentOutOfRangeException(nameof(logActionByte), logActionByte, "uwuwxception while doing wild things")
+                   _                                              => throw new ArgumentOutOfRangeException(nameof(logActionByte), logActionByte, "uwuexception while doing wild things")
                };
     }
 
@@ -87,8 +87,6 @@ file class CreateLogAction(Guid guid = default, string resource = "", string con
         Guid.Deserialize(reader);
         Resource.Deserialize(reader);
         Content.Deserialize(reader);
-
-        Console.WriteLine($"Create | Guid: {Guid} | Resource: {Resource}");
     }
 
     public override long Size()
@@ -156,8 +154,6 @@ file class UpdateLogAction(Guid guid = default, string resource = "", string con
         Guid.Deserialize(reader);
         Resource.Deserialize(reader);
         Content.Deserialize(reader);
-  
-        Console.WriteLine($"Create | Guid: {Guid} | Resource: {Resource}");
     }
 
     public override long Size()
@@ -190,8 +186,6 @@ file class DeleteLogAction(Guid guid = default, string resource = "") : Abstract
         Action.Serialize(writer);
         Guid.Serialize(writer);
         Resource.Serialize(writer);
-   
-        Console.WriteLine($"Create | Guid: {Guid} | Resource: {Resource}");
     }
 
     public override void Deserialize(BinaryReader reader)

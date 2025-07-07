@@ -7,11 +7,12 @@ using Bliztard.Slave.BackgroundService;
 
 namespace Bliztard.Slave.Repository.File;
 
-public class PersistantFileRepository(WiwiwiBackgroundService wiwiwiBackgroundService) : IFileRepository
+public class PersistantFileRepository(ILogger<PersistantFileRepository> logger, WiwiwiBackgroundService wiwiwiBackgroundService) : IFileRepository
 {
     // ReSharper disable once ConvertToConstant.Local
     private readonly string m_DefaultIndex = "primary_index";
 
+    private readonly ILogger<PersistantFileRepository>          m_Logger                  = logger;
     private readonly ConcurrentDictionary<string, MemoryStream> m_SessionContent          = new();
     private readonly WiwiwiBackgroundService                    m_WiwiwiBackgroundService = wiwiwiBackgroundService;
 
@@ -62,5 +63,26 @@ public class PersistantFileRepository(WiwiwiBackgroundService wiwiwiBackgroundSe
             return null;
 
         return new MemoryStream(Encoding.UTF8.GetBytes(data));
+    }
+
+    public void Stats()
+    {
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Start Index Statistics", DateTime.Now);
+
+        foreach (var indexDataSegmentEntry in m_WiwiwiBackgroundService.WiwiwiTable.IndexTable.DataSegment.GetEntries(m_DefaultIndex))
+            m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Key: {Key} | Value: {Value} Index Statistics", DateTime.Now, indexDataSegmentEntry.IndexKey.ToString(),
+                              indexDataSegmentEntry.IndexValue.value);
+
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | End Index Statistics", DateTime.Now);
+
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Start Record Statistics", DateTime.Now);
+
+        foreach (var recordKeySegmentEntry in m_WiwiwiBackgroundService.WiwiwiTable.RecordTable.KeySegment.GetEntries())
+            m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | PathId: {PathId?} | Status: {} | Record Statistics", DateTime.Now, recordKeySegmentEntry.RecordGuid.value,
+                              recordKeySegmentEntry.RecordOffset == -1 ? "Removed" : "Present");
+
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | End Record Statistics", DateTime.Now);
+
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | End Log Statistics", DateTime.Now);
     }
 }

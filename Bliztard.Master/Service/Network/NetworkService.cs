@@ -28,4 +28,13 @@ public class NetworkService(ILogger<NetworkService> logger, IHttpClientFactory h
 
         return await httpClient.PostAsJsonAsync($"{machineInfo.Resource.BaseUrl}/{Configuration.Endpoint.Files.NotifyDelete}", request);
     }
+
+    public async Task<HttpResponseMessage> Stats(MachineInfo machineInfo)
+    {
+        var httpClient = m_HttpClientFactory.CreateClient(); //todo add config, talk
+  
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Stats", DateTime.Now, machineInfo.Id);
+
+        return await httpClient.PostAsync($"{machineInfo.Resource.BaseUrl}/{Configuration.Endpoint.Files.Stats}", null);
+    }
 }

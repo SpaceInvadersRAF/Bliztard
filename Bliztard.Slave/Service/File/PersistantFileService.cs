@@ -28,6 +28,11 @@ public class PersistantFileService(ILogger<PersistantFileService> logger, IFileR
         return m_Repository.Load(resource);
     }
 
+    public void Stats()
+    {
+        m_Repository.Stats();
+    }
+
     public async Task<bool> Update(SaveFileInfo saveFileInfo)
     {
         if (!m_Repository.TryRemoveSessionContent(saveFileInfo.PathId, out var content))

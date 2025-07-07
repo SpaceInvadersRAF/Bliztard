@@ -14,4 +14,6 @@ public interface IFileService : ILifecycle
     public Task<bool> Remove(string resource, Guid guid);
 
     public Stream? Read(string resource);
+
+    void Stats();
 }

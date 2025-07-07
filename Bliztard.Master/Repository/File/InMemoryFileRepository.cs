@@ -116,4 +116,16 @@ public class InMemoryFileRepository(IMachineRepository machineRepository, ILogge
 
         return true;
     }
+
+    public void Stats()
+    {
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Start Statistics", DateTime.Now);
+
+        foreach (var machineResourceEntry in m_MachineResourceDictionary)
+            foreach (var resourceEntry in machineResourceEntry.Value)
+                m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Resource: {Resource} | PathId: {PathId} | Statistics", DateTime.Now, machineResourceEntry.Key,
+                                  resourceEntry.Key, resourceEntry.Value.PathId);
+
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | End Statistics", DateTime.Now);
+    }
 }

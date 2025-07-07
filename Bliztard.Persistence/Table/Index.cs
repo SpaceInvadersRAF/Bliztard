@@ -345,8 +345,7 @@ public class IndexDataSegment(IndexTable indexTable) : IMarshal
 
     public bool RemoveEntry(string indexName, string resource)
     {
-        // return m_Entries.TryGetValue(indexName, out var tree) && tree.TryRemove(new IndexDataSegmentEntry(m_IndexTable, resource)).Success;
-        return true;
+        return m_Entries.TryGetValue(indexName, out var tree) && tree.TryRemove(new IndexDataSegmentEntry(m_IndexTable, resource)).Success;
     }
 
     internal IndexDataSegmentEntry? GetEntry(string indexName, string indexKey)
@@ -362,8 +361,8 @@ public class IndexDataSegmentEntry(IndexTable indexTable, string indexKey = "", 
 {
     private readonly IndexTable m_IndexTable = indexTable;
 
-    internal PersistentUtf8String IndexKey   { set; get; } = indexKey;
-    internal PersistentGuid       IndexValue { set; get; } = indexValue;
+    public PersistentUtf8String IndexKey   { internal set; get; } = indexKey;
+    public PersistentGuid       IndexValue { internal set; get; } = indexValue;
 
     public void Serialize(BinaryWriter writer)
     {

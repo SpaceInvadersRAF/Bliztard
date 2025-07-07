@@ -24,4 +24,6 @@ public interface IFileRepository : ILifecycle
     public bool SaveTransient(Guid machineId, string resource);
 
     public bool RemoveMachine(Guid machineId, out ICollection<FileInfo> outResources);
+
+    public void Stats();
 }
