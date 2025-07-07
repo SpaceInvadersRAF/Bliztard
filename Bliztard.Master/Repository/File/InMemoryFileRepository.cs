@@ -50,6 +50,9 @@ public class InMemoryFileRepository(IMachineRepository machineRepository, ILogge
                 continue;
 
             machineFileInfoList.Add((machineInfo, machineEntry.Value));
+
+            m_MachineResourceDictionary[machineInfo.Id]
+            .Remove(resource, out _);
         }
 
         m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Resource: {Resource} | PathIds: {PathId} | Machines: {Machines} | Remove File Succeeded", DateTime.Now, resource,

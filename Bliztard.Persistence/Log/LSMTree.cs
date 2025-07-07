@@ -48,7 +48,7 @@ internal abstract class AbstractLogAction : IMarshal
     }
 
     public abstract Guid Id();
-    
+
     public abstract void Populate(WiwiwiTable table);
 
     public abstract void Serialize(BinaryWriter writer);
@@ -62,9 +62,9 @@ file class CreateLogAction(Guid guid = default, string resource = "", string con
 {
     public static readonly LogAction Action = LogAction.Create;
 
-    internal          PersistentGuid          Guid     = guid;
-    internal readonly PersistentAsciiString   Resource = resource;
-    internal readonly PersistentUtf8String Content  = content;
+    internal          PersistentGuid        Guid     = guid;
+    internal readonly PersistentAsciiString Resource = resource;
+    internal readonly PersistentUtf8String  Content  = content;
 
     public override Guid Id() => Guid;
 
@@ -103,7 +103,7 @@ file class CreateLogAction(Guid guid = default, string resource = "", string con
 file class RenameLogAction() : AbstractLogAction //todo: one day in the future
 {
     public override Guid Id() => Guid.Empty;
-  
+
     public override void Populate(WiwiwiTable table)
     {
         throw new NotImplementedException();
@@ -129,12 +129,12 @@ file class UpdateLogAction(Guid guid = default, string resource = "", string con
 {
     public static readonly LogAction Action = LogAction.Update;
 
-    internal          PersistentGuid          Guid     = guid;
-    internal readonly PersistentAsciiString   Resource = resource;
-    internal readonly PersistentUtf8String Content  = content;
+    internal          PersistentGuid        Guid     = guid;
+    internal readonly PersistentAsciiString Resource = resource;
+    internal readonly PersistentUtf8String  Content  = content;
 
     public override Guid Id() => Guid;
-    
+
     public override void Populate(WiwiwiTable table)
     {
         table.Update(Guid, Content);
@@ -175,7 +175,7 @@ file class DeleteLogAction(Guid guid = default, string resource = "") : Abstract
     internal readonly PersistentAsciiString Resource = resource;
 
     public override Guid Id() => Guid;
-    
+
     public override void Populate(WiwiwiTable table)
     {
         table.Remove(Guid, "primary_index", Resource);
@@ -217,7 +217,6 @@ public class LogTable(ILogger logger)
     private readonly ConcurrentQueue<LogEntry> m_LogQueue  = new();
     private readonly ManualResetEventSlim      m_LogSignal = new(false);
     public readonly  ILogger                   m_Logger    = logger;
-    
 
     private bool m_IsActive = true;
 
@@ -227,10 +226,10 @@ public class LogTable(ILogger logger)
 
         if (!File.Exists(Configuration.File.LogTablePath))
             return table;
-        
+
         using var fileStream = new FileStream(Configuration.File.LogTablePath, FileMode.Open, FileAccess.Read, FileShare.Read);
         using var reader     = new BinaryReader(fileStream);
-        
+
         while (reader.BaseStream.Position < reader.BaseStream.Length)
         {
             var logAction = AbstractLogAction.FindLogAction(reader);
@@ -262,15 +261,15 @@ public class LogTable(ILogger logger)
                     entry.LogAction.Serialize(writer);
 
                     writer.Flush();
-                    
+
                     m_Logger.LogDebug("Log Table | Guid: {Guid} | Succeeded", entry.LogAction.Id());
-                    
+
                     entry.Source.SetResult(true);
                 }
                 catch
                 {
                     m_Logger.LogDebug("Log Table | Guid: {Guid} | Failed", entry.LogAction.Id());
-                    
+
                     entry.Source.SetResult(false);
                 }
             }
@@ -280,14 +279,14 @@ public class LogTable(ILogger logger)
     public Task<bool> LogCreateAction(Guid guid, string resource, string content)
     {
         m_Logger.LogDebug("Log Table | Create | Guid: {Guid} | Resource: {Resource}", guid, resource);
-        
+
         return AddEntry(new LogEntry(new CreateLogAction(guid, resource, content)));
     }
 
     public Task<bool> LogUpdateAction(Guid guid, string resource, string content)
     {
         m_Logger.LogDebug("Log Table | Update | Guid: {Guid} | Resource: {Resource}", guid, resource);
-        
+
         return AddEntry(new LogEntry(new UpdateLogAction(guid, resource, content)));
     }
 
@@ -300,7 +299,7 @@ public class LogTable(ILogger logger)
     public Task<bool> LogDeleteAction(Guid guid, string resource)
     {
         m_Logger.LogDebug("Log Table | Delete | Guid: {Guid} | Resource: {Resource}", guid, resource);
-        
+
         return AddEntry(new LogEntry(new DeleteLogAction(guid, resource)));
     }
 

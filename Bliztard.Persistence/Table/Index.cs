@@ -345,7 +345,13 @@ public class IndexDataSegment(IndexTable indexTable) : IMarshal
 
     public bool RemoveEntry(string indexName, string resource)
     {
-        return m_Entries.TryGetValue(indexName, out var tree) && tree.TryRemove(new IndexDataSegmentEntry(m_IndexTable, resource)).Success;
+        if (!m_Entries.TryGetValue(indexName, out var tree))
+            return false;
+        
+        // if removed - record's key segment offset should be represented as -1
+        // tree.TryRemove(new IndexDataSegmentEntry(m_IndexTable, resource)).Success;
+        
+        return true;
     }
 
     internal IndexDataSegmentEntry? GetEntry(string indexName, string indexKey)

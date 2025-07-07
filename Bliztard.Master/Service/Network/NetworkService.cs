@@ -33,7 +33,7 @@ public class NetworkService(ILogger<NetworkService> logger, IHttpClientFactory h
     {
         var httpClient = m_HttpClientFactory.CreateClient(); //todo add config, talk
   
-        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Stats", DateTime.Now, machineInfo.Id);
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Send Stats", DateTime.Now, machineInfo.Id);
 
         return await httpClient.PostAsync($"{machineInfo.Resource.BaseUrl}/{Configuration.Endpoint.Files.Stats}", null);
     }

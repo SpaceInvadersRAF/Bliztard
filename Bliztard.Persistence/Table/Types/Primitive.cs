@@ -262,7 +262,7 @@ public class PersistentUtf8String(string value = "") : IMarshal, IComparable<Per
         m_Value = m_Encoding.GetString(reader.ReadBytes(size));
     }
 
-    private int StringSize() => 2 * m_Value.Length;
+    private int StringSize() => m_Value.Length;
     
     public long Size() => sizeof(int) + StringSize();
 
