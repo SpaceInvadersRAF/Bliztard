@@ -11,14 +11,16 @@ public class ApplicationHostedService(IHostApplicationLifetime applicationLifeti
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await m_WiwiwiBackgroundService.StartAsync(cancellationToken);
 
-        m_ApplicationLifetime.ApplicationStarted.Register(m_ApplicationServiceLifecycle.OnApplicationStarted);
-        m_ApplicationLifetime.ApplicationStopped.Register(m_ApplicationServiceLifecycle.OnApplicationStopped);
+        m_ApplicationServiceLifecycle.OnApplicationStarted();
+
+        await m_WiwiwiBackgroundService.StartAsync(cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        m_ApplicationServiceLifecycle.OnApplicationStopped();
+
         await m_WiwiwiBackgroundService.StopAsync(cancellationToken);
     }
 }

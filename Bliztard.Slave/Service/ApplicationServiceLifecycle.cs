@@ -23,8 +23,8 @@ public class ApplicationServiceLifecycle(ILogger<ApplicationServiceLifecycle> lo
         m_Logger.LogInformation("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Application Started", DateTime.Now, m_MachineInfo.Id);
 
         m_MachineInfo.Resource.BaseUrl = Configuration.Core.MachinePublicUrl;
-
-        var uri = new Uri(Urls.First());
+        
+        var uri = new Uri(Configuration.Core.MachinePublicUrl);
         
         m_Logger.LogInformation("Timestamp: {Timestamp:HH:mm:ss.ffffff} | MachineId: {MachineId} | Port: {Port} | Port Number", DateTime.Now, m_MachineInfo.Id, uri.Port);
         

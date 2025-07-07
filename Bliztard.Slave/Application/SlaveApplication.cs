@@ -20,8 +20,6 @@ public class SlaveApplication
     {
         var builder = WebApplication.CreateBuilder(args);
         
-        Console.WriteLine(Configuration.Core.MasterBaseUrl);
-        
         builder.Logging.ClearProviders();
         builder.Logging.AddSimpleConsole(options =>
                                          {
