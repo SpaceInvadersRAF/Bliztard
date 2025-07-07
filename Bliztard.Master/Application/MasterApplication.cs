@@ -18,9 +18,6 @@ public class MasterApplication
     public static void Run(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        Console.WriteLine(Configuration.Core.MasterBaseUrl);
-        Console.WriteLine(Configuration.Core.MachinePublicUrl);
         
         builder.Logging.ClearProviders();
         builder.Logging.AddSimpleConsole(options =>

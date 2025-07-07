@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+
 using Bliztard.Application.Model;
 
 namespace Bliztard.Master.Repository.Machine;
@@ -20,8 +21,14 @@ public class MachineRepository : IMachineRepository
     public MachineInfo? Get(Guid machineId)
     {
         m_Machines.TryGetValue(machineId, out var machineInfo);
-        
+
         return machineInfo;
+    }
+
+    public List<MachineInfo> GetAll(List<Guid> machineIds)
+    {
+        return machineIds.Select(machineId => m_Machines[machineId])
+                         .ToList();
     }
 
     public IEnumerable<MachineInfo> Machines()

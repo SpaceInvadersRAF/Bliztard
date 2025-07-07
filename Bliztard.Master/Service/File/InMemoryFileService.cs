@@ -16,15 +16,27 @@ public class InMemoryFileService(IFileRepository fileRepository, IMachineFileSer
 
     public bool RegisterFile(NotifySaveRequest notifySave)
     {
-        if (!m_FileRepository.SaveUpload(notifySave.MachineInfo.Id, notifySave.ToFileInfo())) 
+        if (!m_FileRepository.SaveUpload(notifySave.MachineInfo.Id, notifySave.ToFileInfo()))
             return false;
 
         if (m_FileRepository.ReplicationCount(notifySave.Resource) >= Configuration.Core.ReplicationFactor)
             return true;
-        
-        var machineInfos = m_MachineFileService.GetUploadLocations(notifySave.Resource, notifySave.ToFileInfo().Size);
+
+        var machineInfos = m_MachineFileService.GetUploadLocations(notifySave.Resource, notifySave.ToFileInfo()
+                                                                                                  .Size);
 
         m_NetworkService.TwincateFileToMachine(notifySave.ToFileInfo(), notifySave.MachineInfo.ToModel(), machineInfos.First()); //todo make it async
+
+        return true;
+    }
+
+    public bool DegenerateFile(string resource)
+    {
+        if (!m_FileRepository.TryRemove(resource, out var machineFileInfoList))
+            return false;
+        
+        foreach (var machineFileInfo in machineFileInfoList)
+            _ = Task.Run(() => m_NetworkService.NotifyDelete(machineFileInfo.MachineInfo, new NotifyDeleteRequest(machineFileInfo.FileInfo.PathId, resource)));
         
         return true;
     }
