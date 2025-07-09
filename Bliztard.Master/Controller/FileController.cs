@@ -42,6 +42,23 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
         return Ok(machineInfo);
     }
 
+    [HttpPost(Configuration.Endpoint.Files.NotifyLogContent)]
+    public IActionResult NotifyLogContent(NotifyLogContentRequest request)
+    {
+        if (!m_FileService.RegisterLog(request))
+        {
+            m_Logger.LogError("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Resources: {Resources} | Notify Log Content Failed", DateTime.Now, request.MachineInfo.Id,
+                              string.Join(", ", request.SaveFileRequest.Select(fileInfo => fileInfo.Resource)));
+
+            return BadRequest();
+        }
+
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Master | MachineId: {MachineId} | Resource: {Resource} | Notify Log Content Succeeded", DateTime.Now, request.MachineInfo.Id,
+                          string.Join(", ", request.SaveFileRequest.Select(fileInfo => fileInfo.Resource)));
+
+        return Ok();
+    }
+
     [HttpPost(Configuration.Endpoint.Files.Delete)]
     public IActionResult Delete([FromForm(Name = "username")] string username, [FromForm(Name = "path")] string path)
     {
@@ -52,7 +69,7 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
 
         return Ok();
     }
-    
+
     [HttpPost(Configuration.Endpoint.Files.Stats)]
     public IActionResult Stats()
     {

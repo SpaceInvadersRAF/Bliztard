@@ -14,6 +14,12 @@ public readonly struct NotifySaveRequest
     public string Location => $"{MachineInfo.BaseUrl}/{Resource}";
 }
 
+public class NotifyLogContentRequest
+{
+    public MachineInfoRequest      MachineInfo     { init; get; }
+    public List<NotifySaveRequest> SaveFileRequest { init; get; } = [];
+}
+
 public readonly struct NotifyDeleteRequest(Guid pathId, string resource)
 {
     public Guid   PathId   { init; get; } = pathId;

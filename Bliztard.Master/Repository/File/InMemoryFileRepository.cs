@@ -30,6 +30,17 @@ public class InMemoryFileRepository(IMachineRepository machineRepository, ILogge
 
         return m_TransientResourceDictionary.TryRemove(Tuple.Create(fileInfo.Resource, machineId), out _);
     }
+    
+    public bool SaveLoggedUpload(Guid machineId, FileInfo fileInfo)
+    {
+        m_ResourceMachineDictionary.AddOrUpdate(fileInfo.Resource, new ConcurrentDictionary<Guid, FileInfo> { [machineId] = fileInfo },
+                                                (_, machineIds) => machineIds.TryAddAndReturn(machineId, fileInfo));
+
+        m_MachineResourceDictionary.AddOrUpdate(machineId, new ConcurrentDictionary<string, FileInfo> { [fileInfo.Resource] = fileInfo },
+                                                (_, resources) => resources.TryAddAndReturn(fileInfo.Resource, fileInfo));
+
+        return true;
+    }
 
     public bool TryRemove(string resource, out List<(MachineInfo MachineInfo, FileInfo FileInfo)> machineFileInfoList)
     {

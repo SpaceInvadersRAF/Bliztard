@@ -9,10 +9,12 @@ namespace Bliztard.Master.Repository.File;
 
 public interface IFileRepository : ILifecycle
 {
-    public bool SaveUpload(Guid machineId, FileInfo fileInfo); 
-    
+    public bool SaveUpload(Guid machineId, FileInfo fileInfo);
+
+    public bool SaveLoggedUpload(Guid machineId, FileInfo fileInfo);
+
     public bool TryRemove(string resource, out List<(MachineInfo MachineInfo, FileInfo FileInfo)> machineFileInfoList);
-    
+
     public MachineInfo? RetrieveMachine(string resource);
 
     public List<MachineInfo> RetrieveAllMachines(string resource);

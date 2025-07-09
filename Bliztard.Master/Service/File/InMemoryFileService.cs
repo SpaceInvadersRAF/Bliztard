@@ -32,6 +32,17 @@ public class InMemoryFileService(IFileRepository fileRepository, IMachineFileSer
         return true;
     }
 
+    public bool RegisterLog(NotifyLogContentRequest request)
+    {
+        var result = true;
+        
+        foreach (var saveFileInfo in request.SaveFileRequest)
+            if (!m_FileRepository.SaveLoggedUpload(saveFileInfo.MachineInfo.Id, saveFileInfo.ToFileInfo()))
+                result = false;
+
+        return result;
+    }
+
     public bool DegenerateFile(string resource)
     {
         if (!m_FileRepository.TryRemove(resource, out var machineFileInfoList))

@@ -12,8 +12,9 @@ public partial struct Configuration
 
     public partial struct HttpClient
     {
-        public static readonly string FileTwincateData = nameof(FileTwincateData);
-        public static readonly string FileNotifyUpload = nameof(FileNotifyUpload);
+        public static readonly string FileTwincateData     = nameof(FileTwincateData);
+        public static readonly string FileNotifyUpload     = nameof(FileNotifyUpload);
+        public static readonly string FileNotifyLogContent = nameof(FileNotifyLogContent);
     }
 
     public partial struct Interval { }
@@ -24,14 +25,15 @@ public partial struct Configuration
         {
             private const string Base = "files";
 
-            public const string Upload       = $"{Base}/upload";
-            public const string Download     = $"{Base}/download";
-            public const string Delete       = $"{Base}/delete";
-            public const string Stats        = $"{Base}/stats";
-            public const string NotifyUpload = $"{Base}/notify-upload";
-            public const string NotifyDelete = $"{Base}/notify-delete";
-            public const string Locate       = $"{Base}/locate";
-            public const string Twincate     = $"{Base}/twincate";
+            public const string Upload           = $"{Base}/upload";
+            public const string Download         = $"{Base}/download";
+            public const string Delete           = $"{Base}/delete";
+            public const string Stats            = $"{Base}/stats";
+            public const string NotifyUpload     = $"{Base}/notify-upload";
+            public const string NotifyDelete     = $"{Base}/notify-delete";
+            public const string Locate           = $"{Base}/locate";
+            public const string Twincate         = $"{Base}/twincate";
+            public const string NotifyLogContent = $"{Base}/notify-log";
         }
     }
 }

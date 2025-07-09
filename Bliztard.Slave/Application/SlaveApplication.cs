@@ -104,6 +104,13 @@ public static class ServiceCollectionExtensions
                                    client.BaseAddress = new Uri(Configuration.Core.MasterBaseUrl);
                                });
         
+        services.AddHttpClient(Configuration.HttpClient.FileNotifyLogContent,
+                               client =>
+                               {
+                                   client.DefaultRequestHeaders.UserAgent.ParseAdd($"Bliztard/{machineInfo.Type} ({machineInfo.Id})");
+                                   client.BaseAddress = new Uri(Configuration.Core.MasterBaseUrl);
+                               });
+        
         return services;
     }
 }

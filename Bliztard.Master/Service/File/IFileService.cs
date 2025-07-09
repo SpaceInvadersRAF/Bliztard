@@ -8,6 +8,8 @@ public interface IFileService : ILifecycle
 {
     public bool RegisterFile(NotifySaveRequest notifySave);
 
+    public bool RegisterLog(NotifyLogContentRequest request);
+
     public bool DegenerateFile(string resource);
     
     public void Stats();

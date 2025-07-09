@@ -39,7 +39,14 @@ public class WiwiwiTable
 
     public List<(PersistentGuid Id, PersistentUtf8String Data)> FindAllResources()
     {
-        return IndexTable.DataSegment.GetEntries("primary_index").Select(entry => (entry.IndexValue, entry.IndexKey))
+        var idSet = RecordTable.KeySegment.GetEntries()
+                               .Where(entry => entry.RecordOffset == -1)
+                               .Select(entry => entry.RecordGuid.value)
+                               .ToHashSet();
+
+        return IndexTable.DataSegment.GetEntries("primary_index")
+                         .Select(entry => (entry.IndexValue, entry.IndexKey))
+                         .Where(entry => !idSet.Contains(entry.IndexValue.value))
                          .ToList();
     }
 
