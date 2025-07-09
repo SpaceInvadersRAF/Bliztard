@@ -19,6 +19,14 @@ public partial struct Configuration
 
     public partial struct Interval { }
 
+    public partial struct File
+    {
+        public static readonly int BlockSize = EnvironmentUtilities.GetIntVariable("BLIZTARD_FILE_BLOCK_SIZE", 16 * 1024 * 1024);
+        
+        public static readonly string RecordDirectory = EnvironmentUtilities.GetStringVariable("BLIZTARD_FILE_RECORD_TABLE_DIRECTORY", "../fs/record");
+        public static readonly string IndexDirectory = EnvironmentUtilities.GetStringVariable("BLIZTARD_FILE_INDEX_TABLE_DIRECTORY", "../fs/index");
+    }
+    
     public partial struct Endpoint
     {
         public struct Files

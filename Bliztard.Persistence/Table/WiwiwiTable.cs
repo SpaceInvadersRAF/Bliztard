@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
+using Bliztard.Application.Configurations;
 using Bliztard.Persistence.Table.Types;
 
 namespace Bliztard.Persistence.Table;
@@ -28,14 +29,6 @@ public class WiwiwiTable
     {
         return RecordTable.RemoveEntry(guid) && IndexTable.RemoveEntry(indexName, resource);
     }
-
-    // public List<PersistentUtf8String> FindAllResources()
-    // {
-    //     var primaryIndexEntities = IndexTable.DataSegment.GetEntries("primary_index");
-    //
-    //     return primaryIndexEntities.Select(entry => entry.IndexKey)
-    //                                .ToList();
-    // }
 
     public List<(PersistentGuid Id, PersistentUtf8String Data)> FindAllResources()
     {
@@ -66,5 +59,24 @@ public class WiwiwiTable
         data = Find(indexName, resource);
 
         return data is not null;
+    }
+
+    public bool Persist()
+    {
+        var fileName       = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+        var recordFilePath = Path.Combine(Configuration.File.RecordDirectory, $"{fileName}.{RecordTable.Extension}");
+        var indexFilePath  = Path.Combine(Configuration.File.IndexDirectory,  $"{fileName}.{IndexTable.Extension}");
+
+        using var recordStream = new FileStream(recordFilePath, FileMode.Create, FileAccess.Write);
+        using var recordWriter = new BinaryWriter(recordStream);
+
+        RecordTable.Serialize(recordWriter);
+
+        using var indexStream = new FileStream(indexFilePath, FileMode.Create, FileAccess.Write);
+        using var indexWriter = new BinaryWriter(indexStream);
+
+        IndexTable.Serialize(indexWriter);
+
+        return true;
     }
 }

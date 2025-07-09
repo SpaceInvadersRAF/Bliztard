@@ -14,6 +14,8 @@ namespace Bliztard.Persistence.Table;
 
 public class IndexTable : IMarshal
 {
+    public const string FileExtension = "index";
+
     internal IndexHeaderSegment HeaderSegment { get; }
     public   IndexKeySegment    KeySegment    { get; }
     public   IndexDataSegment   DataSegment   { get; }
@@ -80,6 +82,8 @@ public class IndexTable : IMarshal
     {
         return HeaderSegment.Size() + KeySegment.Size() + DataSegment.Size();
     }
+    
+    public string Extension => FileExtension;
 }
 
 internal class IndexHeaderSegment(IndexTable indexTable) : IMarshal
@@ -347,10 +351,10 @@ public class IndexDataSegment(IndexTable indexTable) : IMarshal
     {
         if (!m_Entries.TryGetValue(indexName, out var tree))
             return false;
-        
+
         // if removed - record's key segment offset should be represented as -1
         // tree.TryRemove(new IndexDataSegmentEntry(m_IndexTable, resource)).Success;
-        
+
         return true;
     }
 

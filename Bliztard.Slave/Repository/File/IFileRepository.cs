@@ -18,7 +18,11 @@ public interface IFileRepository : ILifecycle
 
     public Task<bool> Delete(string resource, Guid pathId);
 
+    public Task PersistWiwiwiTable();
+
     public Stream? Load(string resource);
 
     void Stats();
+    
+    bool IsBlockFull();
 }

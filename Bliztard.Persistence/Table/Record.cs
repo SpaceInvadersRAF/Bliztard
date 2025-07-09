@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
+
 using Bliztard.Application.Extension;
 using Bliztard.Persistence.Marshaling;
 using Bliztard.Persistence.Table.Types;
@@ -9,6 +11,8 @@ namespace Bliztard.Persistence.Table;
 
 public class RecordTable : IMarshal
 {
+    public const string FileExtension = "record";
+    
     internal RecordHeaderSegment HeaderSegment { get; }
     public   RecordKeySegment    KeySegment    { get; }
     public   RecordDataSegment   DataSegment   { get; }
@@ -122,6 +126,8 @@ public class RecordTable : IMarshal
     {
         return HeaderSegment.Size() + KeySegment.Size() + DataSegment.Size();
     }
+
+    public string Extension => FileExtension;
 }
 
 internal class RecordHeaderSegment(RecordTable recordTable) : IMarshal
@@ -274,7 +280,7 @@ public class RecordKeySegmentEntry(RecordTable recordTable) : IMarshal
     
     public long Size()
     {
-        return RecordGuid.Size() + RecordOffset.Size();
+        return RecordGuid.Size() + RecordOffset.Size() + sizeof(long);
     }
 }
 
