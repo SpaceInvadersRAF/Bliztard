@@ -14,7 +14,6 @@ public class CountCoordinator
         lock (m_Lock)
         {
             m_Count++;
-            Console.WriteLine($"Increase: {m_Count}");
             m_ZeroEventLock.Reset();
         }
     }
@@ -25,8 +24,6 @@ public class CountCoordinator
         {
             m_Count--;
 
-            Console.WriteLine($"Decrease: {m_Count}");
-
             if (m_Count == 0)
                 m_ZeroEventLock.Set();
         }
@@ -35,7 +32,6 @@ public class CountCoordinator
     [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
     public void WaitForZero()
     {
-        Console.WriteLine($"Wait For Zero | {m_Count}");
         m_ZeroEventLock.Wait();
     }
 }

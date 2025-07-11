@@ -7,7 +7,7 @@ namespace Bliztard.Test.Commands;
 public class HelpCommand() : Command(key: Configuration.Command.Help,
                                      description: "Displays help information about available commands.")
 {
-    public override Command Execute(params string[] arguments)
+    public override Command Execute()
     {
         const int width = 128;
         const int commandWidth = 16;
@@ -39,4 +39,8 @@ public class HelpCommand() : Command(key: Configuration.Command.Help,
         
         return Commands[Configuration.Command.Input];
     }
+    
+    public override void SetDefaults() { }
+
+    public override bool ParseArguments(params string[] arguments) => true;
 }

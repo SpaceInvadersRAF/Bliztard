@@ -8,12 +8,16 @@ public class StatsCommand(IHttpClientFactory clientFactory) : Command(key: Confi
 {
     private readonly IHttpClientFactory m_ClientFactory = clientFactory;
     
-    public override Command Execute(params string[] arguments)
+    public override Command Execute()
     {
         Task.Run(Statistics);
         
         return DefaultCommand;
     }
+
+    public override void SetDefaults() { }
+
+    public override bool ParseArguments(params string[] arguments) => true;
 
     private async Task<bool> Statistics()
     {

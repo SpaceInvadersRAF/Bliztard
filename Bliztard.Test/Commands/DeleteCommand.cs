@@ -4,14 +4,23 @@ using AppConfiguration = Bliztard.Application.Configurations.Configuration;
 
 namespace Bliztard.Test.Commands;
 
-public class DeleteCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Delete, description: "Delete's file")
+public class DeleteCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Delete, description: "Deletes file", minimumArguments: 2)
 {
     private readonly IHttpClientFactory m_ClientFactory = clientFactory;
 
-    public override Command Execute(params string[] arguments)
+    private          string          m_Username = string.Empty;
+    private readonly HashSet<string> m_Files    = [];
+
+    public override Command Execute()
     {
-        Task.Run(() => DeleteFile("Urosh<3", "file01.csv"));    
-        
+        var tasks = new Task[m_Files.Count];
+        var index = 0;
+
+        foreach (var fileName in m_Files)
+            tasks[index++] = Task.Run(() => DeleteFile(m_Username, fileName));
+
+        Task.WaitAll(tasks);
+
         return DefaultCommand;
     }
 
@@ -28,9 +37,29 @@ public class DeleteCommand(IHttpClientFactory clientFactory) : Command(key: Conf
 
         Console.WriteLine($"---------------- {AppConfiguration.Endpoint.Files.Delete} --------------------");
 
-        
         Console.WriteLine(response.IsSuccessStatusCode ? $"File {username}/{path} has been successfully deleted." : $"File {username}/{path} deletion has failed.");
-        
+
         return response.IsSuccessStatusCode;
+    }
+
+    public override void SetDefaults()
+    {
+        m_Username = string.Empty;
+        m_Files.Clear();
+    }
+
+    public override bool ParseArguments(params string[] arguments)
+    {
+        if (arguments.Length < 2)
+        {
+            Console.WriteLine("Username and at least one file must be provided.");
+
+            return false;
+        }
+
+        m_Username = arguments.First();
+
+        return arguments.Skip(1)
+                        .All(fileName => m_Files.Add(fileName));
     }
 }

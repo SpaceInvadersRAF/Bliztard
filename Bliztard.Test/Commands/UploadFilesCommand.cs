@@ -13,26 +13,32 @@ namespace Bliztard.Test.Commands;
 
 public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Upload,
                                                                             description: "Uploads specified files from your local machine to the server. (no arguments accepted)",
-                                                                            arguments: ["<username>", "[<file_path> <server_path>]", "[...]"])
+                                                                            arguments: ["<username>", "[<file_path> <server_path>]", "[...]"], minimumArguments: 3)
 
 {
     private readonly IHttpClientFactory m_ClientFactory = clientFactory;
 
-    public override Command Execute(params string[] arguments)
-    {
-        var files = FileUtilities.GetFiles();
-        var tasks = new Task[files.Length];
-        var index = 0;
+    private          string       m_Username    = string.Empty;
+    private readonly List<string> m_LocalPaths  = [];
+    private readonly List<string> m_ServerPaths = [];
 
-        foreach (var filePath in files)
-            tasks[index++] = Task.Run(() => UploadTask(filePath));
+    public override Command Execute()
+    {
+        var tasks = new Task[m_LocalPaths.Count];
+
+        for (int index = 0; index < m_LocalPaths.Count; index++)
+        {
+            var tmp = index;
+            
+            tasks[index] = Task.Run(() => UploadTask(m_LocalPaths[tmp], m_Username, m_ServerPaths[tmp]));
+        }
 
         Task.WaitAll(tasks);
 
         return DefaultCommand;
     }
 
-    private async Task UploadTask(string filePath)
+    private async Task UploadTask(string filePath, string username, string serverFilePath)
     {
         var fileInfo = new FileInfo(filePath);
 
@@ -42,7 +48,7 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
         {
             var machineUrl = await FindUploadLocation(fileInfo);
 
-            successful = await UploadToMachine(fileInfo, machineUrl);
+            successful = await UploadToMachine(machineUrl, fileInfo, username, serverFilePath);
         }
         catch
         {
@@ -60,7 +66,7 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
                       {
                           FilePath = fileInfo.Name,
                           Size     = fileInfo.Length,
-                          Username = "Urosh<3"
+                          Username = m_Username
                       };
 
         var response        = await httpClient.PostAsJsonAsync(AppConfiguration.Endpoint.Machine.UploadLocations, request);
@@ -70,14 +76,14 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
                               .BaseUrl;
     }
 
-    private async Task<bool> UploadToMachine(FileInfo fileInfo, string machineUrl)
+    private async Task<bool> UploadToMachine(string machineUrl, FileInfo fileInfo, string username, string serverPath)
     {
         var httpClient = m_ClientFactory.CreateClient(Configuration.HttpClient.BliztardSlave);
 
         var formData = new MultipartFormDataContent();
 
-        formData.Add(new StringContent("Urosh<3"),     "username");
-        formData.Add(new StringContent(fileInfo.Name), "path");
+        formData.Add(new StringContent(username),   "username");
+        formData.Add(new StringContent(serverPath), "path");
 
         var file = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
 
@@ -92,5 +98,47 @@ public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key:
 
         Console.WriteLine($"---------------- {machineUrl}/{AppConfiguration.Endpoint.Files.Upload} --------------------");
         return response.IsSuccessStatusCode;
+    }
+
+    public override void SetDefaults()
+    {
+        m_Username = string.Empty;
+        m_LocalPaths.Clear();
+        m_ServerPaths.Clear();
+    }
+
+    public override bool ParseArguments(params string[] arguments)
+    {
+        if (arguments.Length < MinimumArguments || arguments.Length % 2 != 1)
+        {
+            Console.WriteLine("Username and at least one file are required.");
+
+            return false;
+        }
+
+        var filesInDirectory = FileUtilities.GetFiles()
+                                            .ToHashSet();
+
+        m_Username = arguments.First();
+
+        for (var index = 1; index < arguments.Length; index += 2)
+        {
+            var fileName       = arguments[index];
+            var serverFilePath = arguments[index + 1];
+
+            var filePath = filesInDirectory.FirstOrDefault(file => Path.GetFileName(file) == fileName);
+
+            if (filePath is null)
+            {
+                Console.WriteLine($"File `{fileName}` does not exist.");
+
+                return false;
+            }
+
+            m_LocalPaths.Add(filePath);
+            m_ServerPaths.Add(serverFilePath);
+        }
+
+        return true;
     }
 }

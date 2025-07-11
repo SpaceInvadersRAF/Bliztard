@@ -41,8 +41,6 @@ public class WiwiwiBackgroundService(ILogger<WiwiwiBackgroundService> logger, Ma
 
     public Task PersistTable(ManualResetEventSlim resetEventLock)
     {
-        Console.WriteLine($"Persist Table");
-        
         CountCoordinator.WaitForZero();
         
         var oldWiwiwiTable = WiwiwiTable;
