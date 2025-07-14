@@ -1,6 +1,7 @@
 ﻿using Bliztard.Application.Configurations;
 using Bliztard.Application.Extension;
 using Bliztard.Application.Model;
+using Bliztard.Application.Web;
 using Bliztard.Contract.Request;
 using Bliztard.Slave.Service.File;
 using Bliztard.Slave.Service.Network;
@@ -88,16 +89,14 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
     }
 
     [HttpGet(Configuration.Endpoint.Files.Download)]
-    public async Task<IActionResult> Download([FromForm(Name = "username")] string username, [FromForm(Name = "path")] string path)
+    public Task<IActionResult> Download([FromForm(Name = "username")] string username, [FromForm(Name = "path")] string path)
     {
-        await using var stream = m_FileService.Read($"{username}/{path}");
+        var stream = m_FileService.Read($"{username}/{path}");
 
         if (stream == null)
-            return NotFound();
-
-        var reader = new StreamReader(stream);
-
-        return Ok(await reader.ReadToEndAsync());
+            return Task.FromResult<IActionResult>(NotFound());
+        
+        return Task.FromResult<IActionResult>(File(stream, MimeType.FromExtension(Path.GetExtension(path)).ContentType.MediaType, Path.GetFileName(path)));
     }
 
     [HttpPost(Configuration.Endpoint.Files.NotifyDelete)]
