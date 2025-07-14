@@ -81,7 +81,6 @@ public class InMemoryFileRepository(IMachineRepository machineRepository, ILogge
                : null;
     }
 
-    //TODO d.z.(domaci) Nemanja proveri
     public List<MachineInfo> RetrieveAllMachines(string resource)
     {
         return m_ResourceMachineDictionary.TryGetValue(resource, out var machineIds)

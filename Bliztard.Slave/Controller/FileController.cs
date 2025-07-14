@@ -88,7 +88,7 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
         return Ok();
     }
 
-    [HttpGet(Configuration.Endpoint.Files.Download)]
+    [HttpPost(Configuration.Endpoint.Files.Download)]
     public Task<IActionResult> Download([FromForm(Name = "username")] string username, [FromForm(Name = "path")] string path)
     {
         var stream = m_FileService.Read($"{username}/{path}");

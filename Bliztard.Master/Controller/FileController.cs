@@ -1,4 +1,5 @@
 ﻿using Bliztard.Application.Configurations;
+using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
 using Bliztard.Contract.Request;
 using Bliztard.Master.Service.File;
@@ -39,7 +40,7 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
         if (machineInfo == null)
             return BadRequest();
 
-        return Ok(machineInfo);
+        return Ok(machineInfo.ToResponse());
     }
 
     [HttpPost(Configuration.Endpoint.Files.NotifyLogContent)]
