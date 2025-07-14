@@ -105,9 +105,11 @@ public class PersistantFileRepository(ILogger<PersistantFileRepository> logger, 
 
         m_WiwiwiBackgroundService.CountCoordinator.Increase();
 
-        var result = m_WiwiwiBackgroundService.WiwiwiTable.TryFind(m_DefaultIndex, resource, out var data) ? data : null;
+        var result = m_WiwiwiBackgroundService.FindResource(resource);
         
         m_WiwiwiBackgroundService.CountCoordinator.Decrease();
+        
+        m_Logger.LogDebug("Timestamp: {Timestamp:HH:mm:ss.ffffff} | Resource: {Resource} | Size: {Size} | Load Resource", DateTime.Now, resource, result?.Size() ?? 0);
         
         return result is null ? null : new MemoryStream(Encoding.UTF8.GetBytes(result));
     }

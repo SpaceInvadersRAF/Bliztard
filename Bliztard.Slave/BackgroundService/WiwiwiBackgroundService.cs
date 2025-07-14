@@ -7,6 +7,7 @@ using Bliztard.Application.Web;
 using Bliztard.Contract.Request;
 using Bliztard.Persistence.Log;
 using Bliztard.Persistence.Table;
+using Bliztard.Persistence.Table.Types;
 using Bliztard.Slave.Service.Network;
 
 namespace Bliztard.Slave.BackgroundService;
@@ -47,11 +48,11 @@ public class WiwiwiBackgroundService(ILogger<WiwiwiBackgroundService> logger, Ma
 
         WiwiwiTable = new WiwiwiTable();
         
-        resetEventLock.Set();
-
         var stopwatch = Stopwatch.StartNew();
         
         oldWiwiwiTable.Persist();
+
+        resetEventLock.Set();
         
         stopwatch.Stop();
 
@@ -60,6 +61,17 @@ public class WiwiwiBackgroundService(ILogger<WiwiwiBackgroundService> logger, Ma
         return Task.CompletedTask;
     }
 
+    public PersistentUtf8String? FindResource(string resource)
+    {
+        if (WiwiwiTable.TryFind("primary_index", resource, out var inMemoryContent))
+            return inMemoryContent;
+
+        if (WiwiwiTable.TryLocateResource(resource, out var onDiskContent))
+            return onDiskContent;
+            
+        return null;
+    }
+    
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         LogTable.Shutdown();

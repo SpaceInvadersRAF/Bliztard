@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
 
 using Bliztard.Application.Extension;
 using Bliztard.Persistence.Marshaling;
@@ -12,11 +11,11 @@ namespace Bliztard.Persistence.Table;
 public class RecordTable : IMarshal
 {
     public const string FileExtension = "record";
-    
+
     internal RecordHeaderSegment HeaderSegment { get; }
     public   RecordKeySegment    KeySegment    { get; }
     public   RecordDataSegment   DataSegment   { get; }
-    
+
     public RecordTable()
     {
         HeaderSegment = new RecordHeaderSegment(this);
@@ -48,12 +47,10 @@ public class RecordTable : IMarshal
     private bool AddEntry(Guid recordGuid, string content, bool @checked)
     {
         var entry = KeySegment.GetEntry(recordGuid);
+
         if (!@checked && entry is not null)
-        {
-            Console.WriteLine($"Entry | guid: {entry.RecordGuid} | ");
             return false;
-        }
-        
+
         KeySegment.AddEntry(recordGuid);
         DataSegment.AddEntry(recordGuid, content);
 
@@ -62,9 +59,9 @@ public class RecordTable : IMarshal
 
     private bool UpdateEntry(Guid recordGuid, string content, RecordKeySegmentEntry? entry)
     {
-        return entry != null && DataSegment.UpdateEntry(recordGuid, content);;
+        return entry != null && DataSegment.UpdateEntry(recordGuid, content);
     }
-    
+
     public bool AddEntry(Guid recordGuid, string content)
     {
         if (!AddEntry(recordGuid, content, false))
@@ -92,7 +89,7 @@ public class RecordTable : IMarshal
 
         if (AddEntry(recordGuid, content, true))
             return true;
-        
+
         // something else maybe
         return false;
     }
@@ -103,8 +100,9 @@ public class RecordTable : IMarshal
 
         if (keyEntry is null || keyEntry.RecordOffset == -1)
             return null;
-        
-        return DataSegment.GetEntry(resourceGuid)?.RecordData;
+
+        return DataSegment.GetEntry(resourceGuid)
+                          ?.RecordData;
     }
 
     public bool TryFindEntry(PersistentGuid resourceGuid, [MaybeNullWhen(false)] out PersistentUtf8String data)
@@ -132,41 +130,49 @@ public class RecordTable : IMarshal
 
 internal class RecordHeaderSegment(RecordTable recordTable) : IMarshal
 {
-    public readonly PersistentConstAsciiString Signature = "BLIZTARDRECORD";
+    public PersistentConstAsciiString Signature         => m_Signature;
+    public PersistentInt8             Version           => m_Version;
+    public PersistentInt64            KeySegmentOffset  => m_KeySegmentOffset;
+    public PersistentInt64            DataSegmentOffset => m_DataSegmentOffset;
 
-    public   PersistentInt8  Version           {         set; get; }
-    internal PersistentInt64 KeySegmentOffset  { private set; get; }
-    internal PersistentInt64 DataSegmentOffset { private set; get; }
-    
+    private readonly PersistentConstAsciiString m_Signature = "BLIZTARDRECORD";
+    private          PersistentInt8             m_Version;
+    private          PersistentInt64            m_KeySegmentOffset;
+    private          PersistentInt64            m_DataSegmentOffset;
+
     private readonly RecordTable m_RecordTable = recordTable;
 
     public void Serialize(BinaryWriter writer)
     {
         Calculate();
-    
-        Signature.Serialize(writer);
-        Version.Serialize(writer);
-        KeySegmentOffset.Serialize(writer);
-        DataSegmentOffset.Serialize(writer);
+
+        m_Signature.Serialize(writer);
+        m_Version.Serialize(writer);
+        m_KeySegmentOffset.Serialize(writer);
+        m_DataSegmentOffset.Serialize(writer);
     }
 
     public void Deserialize(BinaryReader reader)
     {
-        Signature.Deserialize(reader);
-        Version.Deserialize(reader);
-        KeySegmentOffset.Deserialize(reader);
-        DataSegmentOffset.Deserialize(reader);
+        m_Signature.Deserialize(reader);
+        Console.WriteLine($"{nameof(Signature)}: {m_Signature}");
+        m_Version.Deserialize(reader);
+        Console.WriteLine($"{nameof(Version)}: {m_Version}");
+        m_KeySegmentOffset.Deserialize(reader);
+        Console.WriteLine($"{nameof(KeySegmentOffset)}: {m_KeySegmentOffset}");
+        m_DataSegmentOffset.Deserialize(reader);
+        Console.WriteLine($"{nameof(DataSegmentOffset)}: {m_DataSegmentOffset}");
     }
 
     public void Calculate()
     {
-        KeySegmentOffset  = m_RecordTable.HeaderSegment.Size();
-        DataSegmentOffset = KeySegmentOffset + m_RecordTable.KeySegment.Size();
+        m_KeySegmentOffset  = m_RecordTable.HeaderSegment.Size();
+        m_DataSegmentOffset = m_KeySegmentOffset + m_RecordTable.KeySegment.Size();
     }
 
     public long Size()
     {
-        return Signature.Size() + Version.Size() + KeySegmentOffset.Size() + DataSegmentOffset.Size();
+        return m_Signature.Size() + m_Version.Size() + m_KeySegmentOffset.Size() + m_DataSegmentOffset.Size();
     }
 }
 
@@ -189,16 +195,16 @@ public class RecordKeySegment(RecordTable recordTable) : IMarshal
         while (reader.BaseStream.Position < m_RecordTable.HeaderSegment.DataSegmentOffset)
         {
             var entry = new RecordKeySegmentEntry(m_RecordTable);
-            
+
             entry.Deserialize(reader);
-            
+
             AddEntry(entry);
         }
     }
 
     public void AddEntry(Guid recordGuid)
     {
-        AddEntry(new RecordKeySegmentEntry(m_RecordTable) { RecordGuid = recordGuid });
+        AddEntry(new RecordKeySegmentEntry(m_RecordTable, recordGuid));
     }
 
     private void AddEntry(RecordKeySegmentEntry entry)
@@ -210,9 +216,9 @@ public class RecordKeySegment(RecordTable recordTable) : IMarshal
     {
         if (!TryGetEntry(recordGuid, out var entry))
             return false;
-        
-        m_Lock.WriteBlock(() => entry.RecordOffset = -1);
-        
+
+        m_Lock.WriteBlock(() => entry.m_RecordOffset = -1);
+
         return true;
     }
 
@@ -224,7 +230,7 @@ public class RecordKeySegment(RecordTable recordTable) : IMarshal
     internal bool TryGetEntry(Guid recordGuid, [MaybeNullWhen(false)] out RecordKeySegmentEntry entry)
     {
         entry = GetEntry(recordGuid);
-        
+
         return entry is not null;
     }
 
@@ -238,18 +244,20 @@ public class RecordKeySegment(RecordTable recordTable) : IMarshal
         var listEntries = m_Entries.ToArray();
 
         var currentEntry = listEntries[0];
-        
+
         for (var index = 0; index < listEntries.Length; index++)
         {
             var previousEntry = currentEntry;
-        
+
             currentEntry = listEntries[index];
-            
+
             if (currentEntry.Value.RecordOffset == -1)
                 continue;
 
-            currentEntry.Value.RecordOffset = index is 0 ? 0
-                                                         : previousEntry.Value.RecordOffset + previousEntry.Value.Size();
+            if (!m_RecordTable.DataSegment.TryGetEntry(previousEntry.Key, out var entry))
+                throw new KeyNotFoundException($"Record with key {previousEntry.Key} does not exist.");
+            
+            currentEntry.Value.m_RecordOffset = index is 0 ? 0 : previousEntry.Value.RecordOffset + entry.Size();
         }
     }
 
@@ -259,28 +267,33 @@ public class RecordKeySegment(RecordTable recordTable) : IMarshal
     }
 }
 
-public class RecordKeySegmentEntry(RecordTable recordTable) : IMarshal
+public class RecordKeySegmentEntry(RecordTable recordTable, Guid recordId = default) : IMarshal
 {
     private readonly RecordTable m_RecordTable = recordTable;
-    
-    public PersistentGuid  RecordGuid   { internal set; get; }
-    public PersistentInt64 RecordOffset { internal set; get; }
-    
+
+    public PersistentGuid  RecordGuid   => m_RecordGuid;
+    public PersistentInt64 RecordOffset => m_RecordOffset;
+
+    private PersistentGuid  m_RecordGuid = recordId;
+    internal PersistentInt64 m_RecordOffset;
+
     public void Serialize(BinaryWriter writer)
     {
-        RecordGuid.Serialize(writer);
-        RecordOffset.Serialize(writer);
+        m_RecordGuid.Serialize(writer);
+        m_RecordOffset.Serialize(writer);
     }
 
     public void Deserialize(BinaryReader reader)
     {
-        RecordGuid.Deserialize(reader);
-        RecordOffset.Deserialize(reader);
+        m_RecordGuid.Deserialize(reader);
+        Console.WriteLine($"Key | {nameof(RecordGuid)}: {m_RecordGuid}");
+        m_RecordOffset.Deserialize(reader);
+        Console.WriteLine($"Key | {nameof(RecordOffset)}: {m_RecordOffset}");
     }
-    
+
     public long Size()
     {
-        return RecordGuid.Size() + RecordOffset.Size() + sizeof(long);
+        return m_RecordGuid.Size() + m_RecordOffset.Size();
     }
 }
 
@@ -296,41 +309,41 @@ public class RecordDataSegment(RecordTable recordTable) : IMarshal
             if (keyEntry.RecordOffset != -1 && m_Entries.TryGetValue(keyEntry.RecordGuid, out var dataEntry))
                 dataEntry.Serialize(writer);
     }
-    
+
     public void Deserialize(BinaryReader reader)
     {
         foreach (var keyEntry in m_RecordTable.KeySegment.GetEntries())
         {
             if (keyEntry.RecordOffset == -1)
                 continue;
-            
+
             var dataEntry = new RecordDataSegmentEntry(m_RecordTable);
-        
+
             dataEntry.Deserialize(reader);
-        
+
             AddEntry(keyEntry.RecordGuid, dataEntry);
         }
     }
-    
+
     public void Deserialize(BinaryReader reader, Guid recordGuid)
     {
         var keyEntry = m_RecordTable.KeySegment.GetEntry(recordGuid);
-        
+
         if (keyEntry is null || keyEntry.RecordOffset == -1)
             return;
 
         reader.BaseStream.Position = m_RecordTable.HeaderSegment.DataSegmentOffset + keyEntry.RecordOffset;
 
         var entry = new RecordDataSegmentEntry(m_RecordTable);
-        
+
         entry.Deserialize(reader);
-        
+
         AddEntry(recordGuid, entry);
     }
 
     public bool AddEntry(Guid recordGuid, string recordData)
-    { 
-        return AddEntry(recordGuid, new RecordDataSegmentEntry(m_RecordTable) { RecordData = recordData});
+    {
+        return AddEntry(recordGuid, new RecordDataSegmentEntry(m_RecordTable, recordData));
     }
 
     private bool AddEntry(Guid recordGuid, RecordDataSegmentEntry entry)
@@ -345,8 +358,8 @@ public class RecordDataSegment(RecordTable recordTable) : IMarshal
         if (entry == null)
             return false;
 
-        entry.RecordData = recordData;
-        
+        entry.m_RecordData = recordData;
+
         return true;
     }
 
@@ -354,43 +367,52 @@ public class RecordDataSegment(RecordTable recordTable) : IMarshal
     {
         return m_Lock.WriteBlock(() => m_Entries.Remove(recordGuid));
     }
-    
+
     public RecordDataSegmentEntry? GetEntry(Guid recordGuid)
     {
         return m_Lock.ReadBlock(() => m_Entries.GetValueOrDefault(recordGuid));
     }
     
+    public bool TryGetEntry(Guid recordGuid, [MaybeNullWhen(false)] out RecordDataSegmentEntry dataEntry)
+    {
+        dataEntry = m_Lock.ReadBlock(() => m_Entries.GetValueOrDefault(recordGuid));
+        
+        return dataEntry is not null;
+    }
+
     public IList<RecordDataSegmentEntry> GetEntries() // unused - yes it is
     {
         return m_Lock.ReadBlock(() => m_Entries.Values.ToList());
-    } 
-    
+    }
+
     public long Size()
     {
         return m_Entries.Aggregate(0L, (current, entry) => current + entry.Value.Size());
     }
 }
 
-
-public class RecordDataSegmentEntry(RecordTable recordTable) : IMarshal
+public class RecordDataSegmentEntry(RecordTable recordTable, string recordData = "") : IMarshal
 {
-    private readonly RecordTable m_RecordTable  = recordTable;  
+    private readonly RecordTable m_RecordTable = recordTable;
 
-    internal PersistentUtf8String RecordData { set; get; }
+    public PersistentUtf8String RecordData => m_RecordData;
+
+    internal PersistentUtf8String m_RecordData = recordData;
 
     public void Serialize(BinaryWriter writer)
     {
-        RecordData.Serialize(writer);
+        m_RecordData.Serialize(writer);
     }
-    
+
     public void Deserialize(BinaryReader reader)
     {
-        RecordData.Deserialize(reader);
+        m_RecordData.Deserialize(reader);
+        Console.WriteLine($"Data | {nameof(RecordData)}: {m_RecordData.Size()}");
     }
 
     public long Size()
     {
-        return RecordData.Size();
+        return m_RecordData.Size();
     }
 }
 

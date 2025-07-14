@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 
 using Bliztard.Application.Extension;
 using Bliztard.Persistence.Extension;
@@ -82,17 +81,26 @@ public class IndexTable : IMarshal
     {
         return HeaderSegment.Size() + KeySegment.Size() + DataSegment.Size();
     }
-    
+
+    public bool Clear()
+    {
+        return KeySegment.Clear() && DataSegment.Clear();
+    }
+
     public string Extension => FileExtension;
 }
 
 internal class IndexHeaderSegment(IndexTable indexTable) : IMarshal
 {
-    public readonly PersistentConstAsciiString Signature = "BLIZTARDSSINDEX";
+    public PersistentConstAsciiString Signature         => m_Signature;
+    public PersistentInt8             Version           => m_Version;
+    public PersistentInt64            KeySegmentOffset  => m_KeySegmentOffset;
+    public PersistentInt64            DataSegmentOffset => m_DataSegmentOffset;
 
-    public   PersistentInt8  Version           { set;         get; }
-    internal PersistentInt64 KeySegmentOffset  { private set; get; }
-    internal PersistentInt64 DataSegmentOffset { private set; get; }
+    private readonly PersistentConstAsciiString m_Signature = "BLIZTARDSSINDEX";
+    private          PersistentInt8             m_Version;
+    private          PersistentInt64            m_KeySegmentOffset;
+    private          PersistentInt64            m_DataSegmentOffset;
 
     private readonly IndexTable m_IndexTable = indexTable;
 
@@ -100,30 +108,30 @@ internal class IndexHeaderSegment(IndexTable indexTable) : IMarshal
     {
         Calculate();
 
-        Signature.Serialize(writer);
-        Version.Serialize(writer);
-        KeySegmentOffset.Serialize(writer);
-        DataSegmentOffset.Serialize(writer);
+        m_Signature.Serialize(writer);
+        m_Version.Serialize(writer);
+        m_KeySegmentOffset.Serialize(writer);
+        m_DataSegmentOffset.Serialize(writer);
     }
 
     public void Deserialize(BinaryReader reader)
     {
-        Signature.Deserialize(reader);
-        Version.Deserialize(reader);
-        KeySegmentOffset.Deserialize(reader);
-        DataSegmentOffset.Deserialize(reader);
+        m_Signature.Deserialize(reader);
+        m_Version.Deserialize(reader);
+        m_KeySegmentOffset.Deserialize(reader);
+        m_DataSegmentOffset.Deserialize(reader);
     }
 
     public void Calculate()
     {
-        KeySegmentOffset  = m_IndexTable.HeaderSegment.Size();
-        DataSegmentOffset = KeySegmentOffset + m_IndexTable.KeySegment.Size();
+        m_KeySegmentOffset  = m_IndexTable.HeaderSegment.Size();
+        m_DataSegmentOffset = m_KeySegmentOffset + m_IndexTable.KeySegment.Size();
     }
 
     public long Size()
     {
         // TODO: maybe lock
-        return Signature.Size() + Version.Size() + KeySegmentOffset.Size() + DataSegmentOffset.Size();
+        return m_Signature.Size() + m_Version.Size() + m_KeySegmentOffset.Size() + m_DataSegmentOffset.Size();
     }
 }
 
@@ -222,6 +230,14 @@ public class IndexKeySegment(IndexTable indexTable) : IMarshal
     {
         return m_IndexSet.Contains(indexName);
     }
+
+    public bool Clear()
+    {
+        m_Entries.Clear();
+        m_IndexSet.Clear();
+
+        return true;
+    }
 }
 
 public class IndexKeySegmentEntry(IndexTable indexTable, string indexName = "") : IMarshal
@@ -310,7 +326,7 @@ public class IndexDataSegment(IndexTable indexTable) : IMarshal
 
     public bool AddEntry(string indexName, string indexKey, Guid indexValue)
     {
-        return AddEntry(indexName, new IndexDataSegmentEntry(m_IndexTable, indexKey) { IndexValue = indexValue });
+        return AddEntry(indexName, new IndexDataSegmentEntry(m_IndexTable, indexKey, indexValue));
     }
 
     private bool AddEntry(string indexName, IndexDataSegmentEntry entry)
@@ -365,35 +381,45 @@ public class IndexDataSegment(IndexTable indexTable) : IMarshal
                      .Value
                : null;
     }
+
+    public bool Clear()
+    {
+        m_Entries.Clear();
+
+        return true;
+    }
 }
 
 public class IndexDataSegmentEntry(IndexTable indexTable, string indexKey = "", Guid indexValue = default) : IMarshal, IComparable<IndexDataSegmentEntry>
 {
     private readonly IndexTable m_IndexTable = indexTable;
 
-    public PersistentUtf8String IndexKey   { internal set; get; } = indexKey;
-    public PersistentGuid       IndexValue { internal set; get; } = indexValue;
+    private PersistentUtf8String m_IndexKey   = indexKey;
+    private PersistentGuid       m_IndexValue = indexValue;
+
+    public PersistentUtf8String IndexKey   => m_IndexKey;
+    public PersistentGuid       IndexValue => m_IndexValue;
 
     public void Serialize(BinaryWriter writer)
     {
-        IndexKey.Serialize(writer);
-        IndexValue.Serialize(writer);
+        m_IndexKey.Serialize(writer);
+        m_IndexValue.Serialize(writer);
     }
 
     public void Deserialize(BinaryReader reader)
     {
-        IndexKey.Deserialize(reader);
-        IndexValue.Deserialize(reader);
+        m_IndexKey.Deserialize(reader);
+        m_IndexValue.Deserialize(reader);
     }
 
     public void Calculate() { }
 
     public long Size()
     {
-        return IndexKey.Size() + IndexValue.Size();
+        return m_IndexKey.Size() + m_IndexValue.Size();
     }
 
-    public int CompareTo(IndexDataSegmentEntry? other) => IndexKey.CompareTo(other!.IndexKey);
+    public int CompareTo(IndexDataSegmentEntry? other) => m_IndexKey.CompareTo(other!.m_IndexKey);
 }
 
 #endregion

@@ -79,4 +79,51 @@ public class WiwiwiTable
 
         return true;
     }
+
+    public static bool TryLocateResource(string resource, [MaybeNullWhen(false)] out PersistentUtf8String content) //out Stream contentStream
+    {
+        content = null;
+
+        var fileNames = Directory.GetFiles(Configuration.File.RecordDirectory)
+                                 .Select(Path.GetFileNameWithoutExtension)
+                                 .OrderDescending()
+                                 .ToList();
+
+        var table = new WiwiwiTable();
+        
+        foreach (var fileName in fileNames)
+        {
+            using var indexStream = new FileStream(Path.Combine(Configuration.File.IndexDirectory, $"{fileName}.{IndexTable.FileExtension}"), FileMode.Open, FileAccess.Read);
+            using var indexReader = new BinaryReader(indexStream);
+            
+            table.IndexTable.Deserialize(indexReader, "primary_index");
+
+            if (!table.IndexTable.TryFindEntry("primary_index", resource, out var resourceId))
+            {
+                table.IndexTable.Clear();
+                Console.WriteLine($"Resource: {resource} not present in index table");
+                continue;
+            }
+
+            using var recordStream = new FileStream(Path.Combine(Configuration.File.RecordDirectory, $"{fileName}.{RecordTable.FileExtension}"), FileMode.Open, FileAccess.Read);
+            using var recordReader = new BinaryReader(recordStream);
+            
+            table.RecordTable.Deserialize(recordReader, resourceId); // todo: check
+
+            if (!table.RecordTable.TryFindEntry(resourceId, out var resourceContent)) //should always be !true
+            {
+                Console.WriteLine($"Resource: {resource} not present in record table");
+
+                continue;
+            }
+
+            Console.WriteLine($"Resource: {resource} is found in table");
+            
+            content = resourceContent;
+            
+            return true;
+        }
+
+        return false;
+    }
 }

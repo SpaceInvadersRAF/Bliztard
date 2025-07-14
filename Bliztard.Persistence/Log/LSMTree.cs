@@ -278,14 +278,14 @@ public class LogTable(ILogger logger)
 
     public Task<bool> LogCreateAction(Guid guid, string resource, string content)
     {
-        m_Logger.LogDebug("Log Table | Create | Guid: {Guid} | Resource: {Resource}", guid, resource);
+        m_Logger.LogDebug("Log Table | Create | Guid: {Guid} | Resource: {Resource} | Size: {ContentSize}", guid, resource, content.Length);
 
         return AddEntry(new LogEntry(new CreateLogAction(guid, resource, content)));
     }
 
     public Task<bool> LogUpdateAction(Guid guid, string resource, string content)
     {
-        m_Logger.LogDebug("Log Table | Update | Guid: {Guid} | Resource: {Resource}", guid, resource);
+        m_Logger.LogDebug("Log Table | Update | Guid: {Guid} | Resource: {Resource} | Size: {ContentSize}", guid, resource, content.Length);
 
         return AddEntry(new LogEntry(new UpdateLogAction(guid, resource, content)));
     }
