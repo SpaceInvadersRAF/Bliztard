@@ -4,7 +4,8 @@ using AppConfiguration = Bliztard.Application.Configurations.Configuration;
 
 namespace Bliztard.Test.Commands;
 
-public class DeleteCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Delete, description: "Deletes file", minimumArguments: 2)
+public class DeleteCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Delete, description: "Deletes specified files from the server.",
+                                                                       arguments: ["<username>", "[<server_path>]", "[...]"], minimumArguments: 2)
 {
     private readonly IHttpClientFactory m_ClientFactory = clientFactory;
 

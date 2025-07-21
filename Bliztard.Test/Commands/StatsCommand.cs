@@ -4,7 +4,7 @@ using AppConfiguration = Bliztard.Application.Configurations.Configuration;
 
 namespace Bliztard.Test.Commands;
 
-public class StatsCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Stats, description: "Statistics.")
+public class StatsCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Stats, description: "Notifies machines to display their content.")
 {
     private readonly IHttpClientFactory m_ClientFactory = clientFactory;
     

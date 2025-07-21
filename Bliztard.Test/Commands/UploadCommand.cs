@@ -11,8 +11,8 @@ using AppConfiguration = Bliztard.Application.Configurations.Configuration;
 
 namespace Bliztard.Test.Commands;
 
-public class UploadFilesCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Upload,
-                                                                            description: "Uploads specified files from your local machine to the server. (no arguments accepted)",
+public class UploadCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Upload,
+                                                                            description: "Uploads specified files from your local machine to the server.",
                                                                             arguments: ["<username>", "[<file_path> <server_path>]", "[...]"], minimumArguments: 3)
 
 {

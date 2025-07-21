@@ -38,7 +38,7 @@ public class FileController(MachineInfo machineInfo, IFileService fileService, I
         var machineInfo = m_FileService.LocateFile($"{username}/{path}");
 
         if (machineInfo == null)
-            return BadRequest();
+            return NotFound();
 
         return Ok(machineInfo.ToResponse());
     }

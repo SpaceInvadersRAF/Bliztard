@@ -7,10 +7,8 @@ using AppConfiguration = Bliztard.Application.Configurations.Configuration;
 
 namespace Bliztard.Test.Commands;
 
-public class DownloadFilesCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Download,
-                                                                              description: "Downloads specified files from the server to your local machine. (not implemented)",
-                                                                              arguments: ["<username>", "<file_path>", "[file_path2]", "[...]"],
-                                                                              minimumArguments: 2)
+public class DownloadCommand(IHttpClientFactory clientFactory) : Command(key: Configuration.Command.Download, description: "Downloads specified files from the server to your local machine.",
+                                                                         arguments: ["<username>", "[<server_path>]", "[...]"], minimumArguments: 2)
 {
     private readonly IHttpClientFactory m_ClientFactory = clientFactory;
 
@@ -52,6 +50,15 @@ public class DownloadFilesCommand(IHttpClientFactory clientFactory) : Command(ke
         formData.Add(new StringContent(m_ServerPaths.First()), "path");
 
         var response = await httpClient.PostAsync($"{machineUrl}/{AppConfiguration.Endpoint.Files.Download}", formData);
+
+        Console.WriteLine($"---------------- {AppConfiguration.Endpoint.Files.Download} --------------------");
+
+        Console.WriteLine(response.IsSuccessStatusCode
+                          ? $"File {m_Username}/{m_ServerPaths.First()} has been successfully downloaded."
+                          : $"File {m_Username}/{m_ServerPaths.First()} download has failed.");
+
+        if (!response.IsSuccessStatusCode)
+            return false;
 
         await using var stream     = await response.Content.ReadAsStreamAsync();
         await using var fileStream = new FileStream(Path.Combine(Configuration.Core.DownloadFilesDirectory, m_ServerPaths.First()), FileMode.Create, FileAccess.Write);

@@ -39,8 +39,8 @@ public static class ServiceCollectionExtension
         serviceCollection.AddSingleton<Command, ExitCommand>();
         serviceCollection.AddSingleton<Command, StatsCommand>();
         serviceCollection.AddSingleton<Command, DeleteCommand>();
-        serviceCollection.AddSingleton<Command, UploadFilesCommand>();
-        serviceCollection.AddSingleton<Command, DownloadFilesCommand>();
+        serviceCollection.AddSingleton<Command, UploadCommand>();
+        serviceCollection.AddSingleton<Command, DownloadCommand>();
 
         serviceCollection.AddSingleton<Application>();
 
