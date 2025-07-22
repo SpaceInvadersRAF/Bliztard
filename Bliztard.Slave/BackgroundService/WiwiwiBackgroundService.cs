@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-using Bliztard.Application.Mapper;
+﻿using Bliztard.Application.Mapper;
 using Bliztard.Application.Model;
 using Bliztard.Application.Utilities;
 using Bliztard.Application.Web;
@@ -37,6 +35,15 @@ public class WiwiwiBackgroundService(ILogger<WiwiwiBackgroundService> logger, Ma
 
         await m_NetworkService.NotifyLogContent(m_MachineInfo, new NotifyLogContentRequest { SaveFileRequest = fileInfoList, MachineInfo = m_MachineInfo.ToRequest() }, cancellationToken);
 
+
+        fileInfoList = WiwiwiTable.FindAllPersistedResources()
+                                  .Select(resource => new SaveFileInfo(m_MachineInfo, resource.Id, resource.Data, MimeType.FromExtension(Path.GetExtension(resource.Data))
+                                                                                                                          .ContentType.MediaType, 0, 0))
+                                  .Select(saveFileInfo => saveFileInfo.ToRequest())
+                                  .ToList();
+        
+        await m_NetworkService.NotifyLogContent(m_MachineInfo, new NotifyLogContentRequest { SaveFileRequest = fileInfoList, MachineInfo = m_MachineInfo.ToRequest() }, cancellationToken);
+        
         m_LogTableTask = Task.Run(() => LogTable.Start(cancellationToken), cancellationToken);
     }
 

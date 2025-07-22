@@ -54,6 +54,64 @@ public class WiwiwiTable
         return data;
     }
 
+    public List<(PersistentGuid Id, PersistentUtf8String Data)> FindAllPersistedResources()
+    {
+        var fileNames = Directory.GetFiles(Configuration.File.RecordDirectory)
+                                 .Where(filename => Path.GetExtension(filename)[1..]
+                                                        .Equals(RecordTable.FileExtension, StringComparison.InvariantCultureIgnoreCase))
+                                 .Select(Path.GetFileNameWithoutExtension)
+                                 .Order()
+                                 .ToList();
+
+        Console.WriteLine($"Count: {fileNames.Count}");
+
+        var table = new WiwiwiTable();
+
+        var idSet = new HashSet<Guid>();
+
+        foreach (var fileName in fileNames)
+        {
+            Console.WriteLine($"file: {fileName}");
+            using var recordStream = new FileStream(Path.Combine(Configuration.File.RecordDirectory, $"{fileName}.{RecordTable.FileExtension}"), FileMode.Open, FileAccess.Read);
+            using var recordReader = new BinaryReader(recordStream);
+
+            table.RecordTable.KeySegment.Deserialize(recordReader);
+
+            foreach (var entry in RecordTable.KeySegment.GetEntries())
+                if (entry.RecordOffset == -1)
+                {
+                    idSet.Remove(entry.RecordGuid.value);
+                    Console.WriteLine($"Remove Id {entry.RecordGuid.value}");
+                }
+                else
+                {
+                    idSet.Add(entry.RecordGuid.value);
+                    Console.WriteLine($"Add Id {entry.RecordGuid.value}");
+                }
+
+            table.RecordTable.Clear();
+        }
+
+        List<(PersistentGuid Id, PersistentUtf8String Data)> resources = [];
+
+        foreach (var fileName in fileNames)
+        {
+            using var indexStream = new FileStream(Path.Combine(Configuration.File.IndexDirectory, $"{fileName}.{IndexTable.FileExtension}"), FileMode.Open, FileAccess.Read);
+            using var indexReader = new BinaryReader(indexStream);
+
+            table.IndexTable.Deserialize(indexReader, "primary_index");
+
+            resources.AddRange(table.IndexTable.DataSegment.GetEntries("primary_index")
+                                    .Select(entry => (entry.IndexValue, entry.IndexKey))
+                                    .Where(entry => !idSet.Contains(entry.IndexValue.value))
+                                    .ToList());
+
+            table.IndexTable.Clear();
+        }
+
+        return resources;
+    }
+
     public bool TryFind(string indexName, string resource, [MaybeNullWhen(false)] out PersistentUtf8String data)
     {
         data = Find(indexName, resource);
@@ -85,18 +143,19 @@ public class WiwiwiTable
         content = null;
 
         var fileNames = Directory.GetFiles(Configuration.File.RecordDirectory)
-                                 .Where(filename => Path.GetExtension(filename).Equals(RecordTable.FileExtension, StringComparison.InvariantCultureIgnoreCase))
+                                 .Where(filename => Path.GetExtension(filename)
+                                                        .Equals(RecordTable.FileExtension, StringComparison.InvariantCultureIgnoreCase))
                                  .Select(Path.GetFileNameWithoutExtension)
                                  .OrderDescending()
                                  .ToList();
 
         var table = new WiwiwiTable();
-        
+
         foreach (var fileName in fileNames)
         {
             using var indexStream = new FileStream(Path.Combine(Configuration.File.IndexDirectory, $"{fileName}.{IndexTable.FileExtension}"), FileMode.Open, FileAccess.Read);
             using var indexReader = new BinaryReader(indexStream);
-            
+
             table.IndexTable.Deserialize(indexReader, "primary_index");
 
             if (!table.IndexTable.TryFindEntry("primary_index", resource, out var resourceId))
@@ -108,7 +167,7 @@ public class WiwiwiTable
 
             using var recordStream = new FileStream(Path.Combine(Configuration.File.RecordDirectory, $"{fileName}.{RecordTable.FileExtension}"), FileMode.Open, FileAccess.Read);
             using var recordReader = new BinaryReader(recordStream);
-            
+
             table.RecordTable.Deserialize(recordReader, resourceId); // todo: check
 
             if (!table.RecordTable.TryFindEntry(resourceId, out var resourceContent)) //should always be !true
@@ -119,9 +178,9 @@ public class WiwiwiTable
             }
 
             Console.WriteLine($"Resource: {resource} is found in table");
-            
+
             content = resourceContent;
-            
+
             return true;
         }
 

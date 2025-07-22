@@ -126,6 +126,11 @@ public class RecordTable : IMarshal
     }
 
     public string Extension => FileExtension;
+
+    public bool Clear()
+    {
+        return KeySegment.Clear() && DataSegment.Clear();
+    }
 }
 
 internal class RecordHeaderSegment(RecordTable recordTable) : IMarshal
@@ -256,7 +261,7 @@ public class RecordKeySegment(RecordTable recordTable) : IMarshal
 
             if (!m_RecordTable.DataSegment.TryGetEntry(previousEntry.Key, out var entry))
                 throw new KeyNotFoundException($"Record with key {previousEntry.Key} does not exist.");
-            
+
             currentEntry.Value.m_RecordOffset = index is 0 ? 0 : previousEntry.Value.RecordOffset + entry.Size();
         }
     }
@@ -264,6 +269,13 @@ public class RecordKeySegment(RecordTable recordTable) : IMarshal
     public long Size()
     {
         return m_Entries.Aggregate(0L, (current, entry) => current + entry.Value.Size());
+    }
+
+    public bool Clear()
+    {
+        m_Entries.Clear();
+
+        return true;
     }
 }
 
@@ -274,7 +286,7 @@ public class RecordKeySegmentEntry(RecordTable recordTable, Guid recordId = defa
     public PersistentGuid  RecordGuid   => m_RecordGuid;
     public PersistentInt64 RecordOffset => m_RecordOffset;
 
-    private PersistentGuid  m_RecordGuid = recordId;
+    private  PersistentGuid  m_RecordGuid = recordId;
     internal PersistentInt64 m_RecordOffset;
 
     public void Serialize(BinaryWriter writer)
@@ -372,11 +384,11 @@ public class RecordDataSegment(RecordTable recordTable) : IMarshal
     {
         return m_Lock.ReadBlock(() => m_Entries.GetValueOrDefault(recordGuid));
     }
-    
+
     public bool TryGetEntry(Guid recordGuid, [MaybeNullWhen(false)] out RecordDataSegmentEntry dataEntry)
     {
         dataEntry = m_Lock.ReadBlock(() => m_Entries.GetValueOrDefault(recordGuid));
-        
+
         return dataEntry is not null;
     }
 
@@ -388,6 +400,13 @@ public class RecordDataSegment(RecordTable recordTable) : IMarshal
     public long Size()
     {
         return m_Entries.Aggregate(0L, (current, entry) => current + entry.Value.Size());
+    }
+
+    public bool Clear()
+    {
+        m_Entries.Clear();
+
+        return true;
     }
 }
 
