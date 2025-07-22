@@ -206,6 +206,19 @@ file class DeleteLogAction(Guid guid = default, string resource = "") : Abstract
     }
 }
 
+file class ClearLogAction() : AbstractLogAction
+{
+    public override Guid Id() => Guid.Empty;
+
+    public override void Populate(WiwiwiTable table) { }
+
+    public override void Serialize(BinaryWriter writer) { }
+
+    public override void Deserialize(BinaryReader reader) { }
+
+    public override long Size() => 0;
+}
+
 internal class LogEntry(AbstractLogAction logAction)
 {
     public readonly AbstractLogAction          LogAction = logAction;
@@ -214,9 +227,9 @@ internal class LogEntry(AbstractLogAction logAction)
 
 public class LogTable(ILogger logger)
 {
+    public readonly  ILogger                   m_Logger    = logger;
     private readonly ConcurrentQueue<LogEntry> m_LogQueue  = new();
     private readonly ManualResetEventSlim      m_LogSignal = new(false);
-    public readonly  ILogger                   m_Logger    = logger;
 
     private bool m_IsActive = true;
 
@@ -243,8 +256,8 @@ public class LogTable(ILogger logger)
 
     public void Start(CancellationToken cancellationToken)
     {
-        using var fileStream = new FileStream(Configuration.File.LogTablePath, FileMode.Append, FileAccess.Write, FileShare.Read);
-        using var writer     = new BinaryWriter(fileStream);
+        var fileStream = new FileStream(Configuration.File.LogTablePath, FileMode.Append, FileAccess.Write, FileShare.Read);
+        var writer     = new BinaryWriter(fileStream);
 
         while (m_IsActive || !m_LogQueue.IsEmpty)
         {
@@ -256,6 +269,19 @@ public class LogTable(ILogger logger)
 
             while (m_LogQueue.TryDequeue(out var entry))
             {
+                if (entry.LogAction is ClearLogAction _)
+                {
+                    writer.Dispose();
+                    fileStream.Dispose();
+                    
+                    fileStream = new FileStream(Configuration.File.LogTablePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    writer     = new BinaryWriter(fileStream);
+                    
+                    entry.Source.SetResult(true);
+                 
+                    continue;
+                }
+                
                 try
                 {
                     entry.LogAction.Serialize(writer);
@@ -274,6 +300,9 @@ public class LogTable(ILogger logger)
                 }
             }
         }
+        
+        writer.Dispose();
+        fileStream.Dispose();
     }
 
     public Task<bool> LogCreateAction(Guid guid, string resource, string content)
@@ -309,6 +338,13 @@ public class LogTable(ILogger logger)
         m_LogSignal.Set();
 
         return entry.Source.Task;
+    }
+
+    public Task<bool> ClearAsync()
+    {
+        m_Logger.LogDebug("Log Table | Clear");
+
+        return AddEntry(new LogEntry(new ClearLogAction()));
     }
 
     public void Shutdown()
