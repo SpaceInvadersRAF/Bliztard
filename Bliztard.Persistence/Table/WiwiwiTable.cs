@@ -85,6 +85,7 @@ public class WiwiwiTable
         content = null;
 
         var fileNames = Directory.GetFiles(Configuration.File.RecordDirectory)
+                                 .Where(filename => Path.GetExtension(filename).Equals(RecordTable.FileExtension, StringComparison.InvariantCultureIgnoreCase))
                                  .Select(Path.GetFileNameWithoutExtension)
                                  .OrderDescending()
                                  .ToList();

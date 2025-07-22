@@ -18,7 +18,7 @@ public class WiwiwiBackgroundService(ILogger<WiwiwiBackgroundService> logger, Ma
     public           LogTable         LogTable    { private set; get; } = null!;
     private readonly INetworkService  m_NetworkService = networkService;
     private readonly MachineInfo      m_MachineInfo    = machineInfo;
-    public  readonly CountCoordinator CountCoordinator = new();
+    public readonly  CountCoordinator CountCoordinator = new();
 
     private readonly ILogger<WiwiwiBackgroundService> m_Logger       = logger;
     private          Task                             m_LogTableTask = null!;
@@ -40,25 +40,19 @@ public class WiwiwiBackgroundService(ILogger<WiwiwiBackgroundService> logger, Ma
         m_LogTableTask = Task.Run(() => LogTable.Start(cancellationToken), cancellationToken);
     }
 
-    public Task PersistTable(ManualResetEventSlim resetEventLock)
+    public async Task PersistTable(ManualResetEventSlim resetEventLock)
     {
         CountCoordinator.WaitForZero();
-        
+
         var oldWiwiwiTable = WiwiwiTable;
 
         WiwiwiTable = new WiwiwiTable();
-        
-        var stopwatch = Stopwatch.StartNew();
-        
-        oldWiwiwiTable.Persist();
+
+        oldWiwiwiTable.Persist(); //async
+
+        await LogTable.ClearAsync();
 
         resetEventLock.Set();
-        
-        stopwatch.Stop();
-
-        Console.WriteLine($"Elapsed time: {stopwatch.ElapsedMilliseconds}");
-        
-        return Task.CompletedTask;
     }
 
     public PersistentUtf8String? FindResource(string resource)
@@ -68,10 +62,10 @@ public class WiwiwiBackgroundService(ILogger<WiwiwiBackgroundService> logger, Ma
 
         if (WiwiwiTable.TryLocateResource(resource, out var onDiskContent))
             return onDiskContent;
-            
+
         return null;
     }
-    
+
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         LogTable.Shutdown();
