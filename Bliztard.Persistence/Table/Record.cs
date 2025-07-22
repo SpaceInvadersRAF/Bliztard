@@ -160,13 +160,9 @@ internal class RecordHeaderSegment(RecordTable recordTable) : IMarshal
     public void Deserialize(BinaryReader reader)
     {
         m_Signature.Deserialize(reader);
-        Console.WriteLine($"{nameof(Signature)}: {m_Signature}");
         m_Version.Deserialize(reader);
-        Console.WriteLine($"{nameof(Version)}: {m_Version}");
         m_KeySegmentOffset.Deserialize(reader);
-        Console.WriteLine($"{nameof(KeySegmentOffset)}: {m_KeySegmentOffset}");
         m_DataSegmentOffset.Deserialize(reader);
-        Console.WriteLine($"{nameof(DataSegmentOffset)}: {m_DataSegmentOffset}");
     }
 
     public void Calculate()
@@ -298,9 +294,7 @@ public class RecordKeySegmentEntry(RecordTable recordTable, Guid recordId = defa
     public void Deserialize(BinaryReader reader)
     {
         m_RecordGuid.Deserialize(reader);
-        Console.WriteLine($"Key | {nameof(RecordGuid)}: {m_RecordGuid}");
         m_RecordOffset.Deserialize(reader);
-        Console.WriteLine($"Key | {nameof(RecordOffset)}: {m_RecordOffset}");
     }
 
     public long Size()
@@ -426,7 +420,6 @@ public class RecordDataSegmentEntry(RecordTable recordTable, string recordData =
     public void Deserialize(BinaryReader reader)
     {
         m_RecordData.Deserialize(reader);
-        Console.WriteLine($"Data | {nameof(RecordData)}: {m_RecordData.Size()}");
     }
 
     public long Size()

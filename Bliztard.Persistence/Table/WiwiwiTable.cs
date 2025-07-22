@@ -63,15 +63,12 @@ public class WiwiwiTable
                                  .Order()
                                  .ToList();
 
-        Console.WriteLine($"Count: {fileNames.Count}");
-
         var table = new WiwiwiTable();
 
         var idSet = new HashSet<Guid>();
 
         foreach (var fileName in fileNames)
         {
-            Console.WriteLine($"file: {fileName}");
             using var recordStream = new FileStream(Path.Combine(Configuration.File.RecordDirectory, $"{fileName}.{RecordTable.FileExtension}"), FileMode.Open, FileAccess.Read);
             using var recordReader = new BinaryReader(recordStream);
 
@@ -79,15 +76,9 @@ public class WiwiwiTable
 
             foreach (var entry in RecordTable.KeySegment.GetEntries())
                 if (entry.RecordOffset == -1)
-                {
                     idSet.Remove(entry.RecordGuid.value);
-                    Console.WriteLine($"Remove Id {entry.RecordGuid.value}");
-                }
                 else
-                {
                     idSet.Add(entry.RecordGuid.value);
-                    Console.WriteLine($"Add Id {entry.RecordGuid.value}");
-                }
 
             table.RecordTable.Clear();
         }
@@ -161,7 +152,7 @@ public class WiwiwiTable
             if (!table.IndexTable.TryFindEntry("primary_index", resource, out var resourceId))
             {
                 table.IndexTable.Clear();
-                Console.WriteLine($"Resource: {resource} not present in index table");
+                
                 continue;
             }
 
@@ -171,13 +162,7 @@ public class WiwiwiTable
             table.RecordTable.Deserialize(recordReader, resourceId); // todo: check
 
             if (!table.RecordTable.TryFindEntry(resourceId, out var resourceContent)) //should always be !true
-            {
-                Console.WriteLine($"Resource: {resource} not present in record table");
-
                 continue;
-            }
-
-            Console.WriteLine($"Resource: {resource} is found in table");
 
             content = resourceContent;
 
